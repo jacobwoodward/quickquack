@@ -4,7 +4,7 @@ import { BookingPage } from "@/components/booking/booking-page";
 import type { User, EventType, Schedule, Availability } from "@/lib/types/database";
 
 // Single-user app - this is the default username
-const DEFAULT_USERNAME = "JacobWoodward";
+const DEFAULT_USERNAME = "jacobwoodward";
 
 interface BookingPageProps {
   params: Promise<{ slug: string }>;

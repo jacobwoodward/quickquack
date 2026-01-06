@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import type { User, EventType, PageSettings, Link, SocialProfile } from "@/lib/types/database";
 
 // Single-user app - this is the default username
-const DEFAULT_USERNAME = "JacobWoodward";
+const DEFAULT_USERNAME = "jacobwoodward";
 
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createServiceClient();
