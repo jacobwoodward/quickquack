@@ -1,0 +1,211 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/server";
+import { getGoogleCalendarService } from "@/lib/google/calendar";
+import { parseISO, setHours, setMinutes, addMinutes, parse } from "date-fns";
+import { fromZonedTime } from "date-fns-tz";
+import { sendBookingConfirmation } from "@/lib/email/notifications";
+import type { EventType, User, Booking } from "@/lib/types/database";
+
+/**
+ * Parse time string in either 12h (h:mm a) or 24h (HH:mm) format
+ */
+function parseTimeString(time: string): { hours: number; minutes: number } {
+  // Check if it's 12-hour format (contains AM/PM)
+  const is12Hour = /am|pm/i.test(time);
+
+  if (is12Hour) {
+    // Parse 12-hour format like "1:30 PM" or "12:00 AM"
+    const parsed = parse(time, "h:mm a", new Date());
+    return { hours: parsed.getHours(), minutes: parsed.getMinutes() };
+  } else {
+    // Parse 24-hour format like "13:30"
+    const [hours, minutes] = time.split(":").map(Number);
+    return { hours, minutes };
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { eventTypeId, date, time, timezone, name, email, notes } = body;
+
+    if (!eventTypeId || !date || !time || !name || !email) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const supabase = await createServiceClient();
+
+    // Get event type
+    const { data: eventTypeData, error: eventTypeError } = await supabase
+      .from("event_types")
+      .select("*")
+      .eq("id", eventTypeId)
+      .single();
+
+    const eventType = eventTypeData as EventType | null;
+
+    if (eventTypeError || !eventType) {
+      return NextResponse.json(
+        { error: "Event type not found" },
+        { status: 404 }
+      );
+    }
+
+    // Get user
+    const { data: userData } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", eventType.user_id)
+      .single();
+
+    const user = userData as User | null;
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Parse the booking time (supports both 12h and 24h formats)
+    const { hours, minutes } = parseTimeString(time);
+    let startTime = parseISO(date);
+    startTime = setHours(startTime, hours);
+    startTime = setMinutes(startTime, minutes);
+
+    // Convert from guest timezone to UTC
+    const startTimeUtc = fromZonedTime(startTime, timezone);
+    const endTimeUtc = addMinutes(startTimeUtc, eventType.length);
+
+    // Create the booking
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: bookingData, error: bookingError } = await (supabase as any)
+      .from("bookings")
+      .insert({
+        user_id: eventType.user_id,
+        event_type_id: eventTypeId,
+        title: `${eventType.title} with ${name}`,
+        description: notes || null,
+        start_time: startTimeUtc.toISOString(),
+        end_time: endTimeUtc.toISOString(),
+        status: "ACCEPTED",
+        location_type: eventType.location_type,
+        location_value: eventType.location_value,
+      })
+      .select()
+      .single();
+
+    const booking = bookingData as Booking | null;
+
+    if (bookingError || !booking) {
+      console.error("Booking error:", bookingError);
+      return NextResponse.json(
+        { error: "Failed to create booking" },
+        { status: 500 }
+      );
+    }
+
+    // Create attendee record
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).from("attendees").insert({
+      booking_id: booking.id,
+      email,
+      name,
+      timezone,
+    });
+
+    // Create Google Calendar event if using Google Meet
+    let meetingUrl: string | undefined;
+
+    try {
+      const calendarService = await getGoogleCalendarService(eventType.user_id);
+
+      if (calendarService) {
+        // Get destination calendar
+        const { data: destCalendar } = await supabase
+          .from("destination_calendars")
+          .select("external_id")
+          .eq("user_id", eventType.user_id)
+          .single();
+
+        const calendarId = (destCalendar as { external_id: string } | null)?.external_id || "primary";
+
+        const result = await calendarService.createEvent({
+          calendarId,
+          summary: booking.title,
+          description: notes || `Booked via Cal-Lite`,
+          startTime: startTimeUtc,
+          endTime: endTimeUtc,
+          attendees: [
+            { email: user.email, name: user.name || undefined },
+            { email, name },
+          ],
+          createMeet: eventType.location_type === "google_meet",
+        });
+
+        meetingUrl = result.meetingUrl;
+
+        // Store booking reference
+        const { data: credential } = await supabase
+          .from("credentials")
+          .select("id")
+          .eq("user_id", eventType.user_id)
+          .eq("type", "google_calendar")
+          .single();
+
+        const credentialData = credential as { id: string } | null;
+        if (credentialData) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (supabase as any).from("booking_references").insert({
+            booking_id: booking.id,
+            credential_id: credentialData.id,
+            type: "google_calendar",
+            external_id: result.eventId,
+            meeting_url: meetingUrl,
+          });
+
+          // Update booking with meeting URL
+          if (meetingUrl) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await (supabase as any)
+              .from("bookings")
+              .update({ location_value: meetingUrl })
+              .eq("id", booking.id);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to create calendar event:", error);
+      // Continue without calendar event
+    }
+
+    // Send confirmation email
+    try {
+      await sendBookingConfirmation({
+        to: email,
+        guestName: name,
+        hostName: user.name || user.email,
+        eventTitle: eventType.title,
+        startTime: startTimeUtc,
+        endTime: endTimeUtc,
+        timezone,
+        location: meetingUrl || eventType.location_value || undefined,
+        bookingUid: booking.uid,
+      });
+    } catch (error) {
+      console.error("Failed to send confirmation email:", error);
+      // Continue without email
+    }
+
+    return NextResponse.json({
+      uid: booking.uid,
+      meetingUrl,
+    });
+  } catch (error) {
+    console.error("Booking API error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
