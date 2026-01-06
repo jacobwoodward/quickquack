@@ -377,6 +377,7 @@ export interface Database {
       page_settings: {
         Row: {
           user_id: string;
+          page_title: string | null;
           bio: string | null;
           theme: PageTheme;
           primary_color: string;
@@ -404,6 +405,7 @@ export interface Database {
         };
         Insert: {
           user_id: string;
+          page_title?: string | null;
           bio?: string | null;
           theme?: PageTheme;
           primary_color?: string;
@@ -431,6 +433,7 @@ export interface Database {
         };
         Update: {
           user_id?: string;
+          page_title?: string | null;
           bio?: string | null;
           theme?: PageTheme;
           primary_color?: string;

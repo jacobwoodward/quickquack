@@ -27,6 +27,7 @@ interface PublicPageProps {
 
 // Default settings when none exist
 const defaultSettings: Omit<PageSettings, "user_id" | "created_at" | "updated_at"> = {
+  page_title: null,
   bio: null,
   theme: "minimal",
   primary_color: "#000000",
@@ -302,22 +303,6 @@ export function PublicPage({
           </motion.div>
         )}
 
-        {/* Branding footer */}
-        {!settings.hide_branding && (
-          <motion.div
-            variants={itemVariants}
-            className="mt-12 text-center text-sm opacity-40"
-          >
-            <a
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:opacity-70 transition-opacity"
-            >
-              Powered by Cal-Lite
-            </a>
-          </motion.div>
-        )}
       </motion.div>
 
       {/* Custom CSS */}

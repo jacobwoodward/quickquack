@@ -72,6 +72,7 @@ export function AppearanceSettings({
   const [success, setSuccess] = useState(false);
 
   // Form state
+  const [pageTitle, setPageTitle] = useState(initialSettings.page_title || "");
   const [theme, setTheme] = useState<PageTheme>(initialSettings.theme);
   const [bio, setBio] = useState(initialSettings.bio || "");
   const [primaryColor, setPrimaryColor] = useState(initialSettings.primary_color);
@@ -117,6 +118,7 @@ export function AppearanceSettings({
     const supabase = createClient();
 
     const data: UpdatePageSettings = {
+      page_title: pageTitle || null,
       theme,
       bio: bio || null,
       primary_color: primaryColor,
@@ -213,6 +215,14 @@ export function AppearanceSettings({
             <CardTitle>Profile</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <Input
+              label="Page Title"
+              id="pageTitle"
+              value={pageTitle}
+              onChange={(e) => setPageTitle(e.target.value)}
+              placeholder="My Links"
+            />
+
             <Textarea
               label="Bio"
               id="bio"

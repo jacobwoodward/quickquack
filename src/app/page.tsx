@@ -1,10 +1,45 @@
 import { createServiceClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { PublicPage } from "@/components/public/public-page";
+import type { Metadata } from "next";
 import type { User, EventType, PageSettings, Link, SocialProfile } from "@/lib/types/database";
 
 // Single-user app - this is the default username
 const DEFAULT_USERNAME = "JacobWoodward";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createServiceClient();
+
+  // Find user by username
+  const { data: userData } = await supabase
+    .from("users")
+    .select("*")
+    .eq("username", DEFAULT_USERNAME)
+    .single();
+
+  const user = userData as User | null;
+
+  if (!user) {
+    return { title: "Not Found" };
+  }
+
+  // Get page settings
+  const { data: pageSettingsData } = await supabase
+    .from("page_settings")
+    .select("page_title, bio")
+    .eq("user_id", user.id)
+    .single();
+
+  const pageSettings = pageSettingsData as { page_title: string | null; bio: string | null } | null;
+
+  const title = pageSettings?.page_title || user.name || DEFAULT_USERNAME;
+  const description = pageSettings?.bio || `Book time with ${user.name || DEFAULT_USERNAME}`;
+
+  return {
+    title,
+    description,
+  };
+}
 
 export default async function Home() {
   const supabase = await createServiceClient();
