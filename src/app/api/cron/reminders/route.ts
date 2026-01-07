@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendBookingReminder } from "@/lib/email/notifications";
-import { addHours } from "date-fns";
+import { startOfDay, endOfDay } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 
 // This endpoint is called by Vercel Cron
-// Runs every 15 minutes to send reminder emails for bookings starting in ~1 hour
+// Runs daily at 8am ET to send reminder emails for all bookings happening today
 
 interface Attendee {
   id: string;
@@ -63,9 +64,11 @@ export async function GET(request: NextRequest) {
 
   try {
     const now = new Date();
-    // Look for bookings starting in 45-75 minutes (to account for 15-min cron intervals)
-    const windowStart = addHours(now, 0.75); // 45 minutes from now
-    const windowEnd = addHours(now, 1.25); // 75 minutes from now
+    // Get today's date range in ET timezone
+    const etTimezone = "America/New_York";
+    const nowInET = toZonedTime(now, etTimezone);
+    const todayStart = startOfDay(nowInET);
+    const todayEnd = endOfDay(nowInET);
 
     // Find bookings that need reminders
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -79,8 +82,8 @@ export async function GET(request: NextRequest) {
       `)
       .eq("status", "ACCEPTED")
       .eq("reminder_status", "pending")
-      .gte("start_time", windowStart.toISOString())
-      .lte("start_time", windowEnd.toISOString());
+      .gte("start_time", todayStart.toISOString())
+      .lte("start_time", todayEnd.toISOString());
 
     const bookings = bookingsData as BookingWithRelations[] | null;
 
