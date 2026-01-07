@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { DollarSign, Info } from "lucide-react";
 import type { EventType, LocationType } from "@/lib/types/database";
 
 interface EventTypeFormProps {
@@ -58,6 +59,17 @@ const bookingWindowOptions = [
   { value: "365", label: "1 year" },
 ];
 
+const refundWindowOptions = [
+  { value: "0", label: "No refunds" },
+  { value: "1", label: "1 hour before" },
+  { value: "2", label: "2 hours before" },
+  { value: "4", label: "4 hours before" },
+  { value: "12", label: "12 hours before" },
+  { value: "24", label: "24 hours before" },
+  { value: "48", label: "48 hours before" },
+  { value: "72", label: "72 hours before" },
+];
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -94,6 +106,31 @@ export function EventTypeForm({ eventType }: EventTypeFormProps) {
   );
   const [hidden, setHidden] = useState(eventType?.hidden || false);
 
+  // Payment fields
+  const [isPaid, setIsPaid] = useState(eventType?.is_paid || false);
+  const [priceInDollars, setPriceInDollars] = useState(
+    eventType?.price_cents ? String(eventType.price_cents / 100) : ""
+  );
+  const [refundWindowHours, setRefundWindowHours] = useState(
+    String(eventType?.refund_window_hours || 24)
+  );
+  const [promoCode, setPromoCode] = useState(eventType?.promo_code || "");
+  const [stripeConfigured, setStripeConfigured] = useState<boolean | null>(null);
+
+  // Check if Stripe is configured
+  useEffect(() => {
+    async function checkStripe() {
+      try {
+        const res = await fetch("/api/stripe/status");
+        const data = await res.json();
+        setStripeConfigured(data.configured);
+      } catch {
+        setStripeConfigured(false);
+      }
+    }
+    checkStripe();
+  }, []);
+
   const handleTitleChange = (value: string) => {
     setTitle(value);
     if (!eventType) {
@@ -117,6 +154,11 @@ export function EventTypeForm({ eventType }: EventTypeFormProps) {
       return;
     }
 
+    // Convert price from dollars to cents
+    const priceCents = isPaid && priceInDollars
+      ? Math.round(parseFloat(priceInDollars) * 100)
+      : null;
+
     const data = {
       user_id: user.id,
       title,
@@ -130,6 +172,10 @@ export function EventTypeForm({ eventType }: EventTypeFormProps) {
       minimum_notice: parseInt(minimumNotice),
       booking_window_days: bookingWindowDays ? parseInt(bookingWindowDays) : null,
       hidden,
+      is_paid: isPaid,
+      price_cents: priceCents,
+      refund_window_hours: parseInt(refundWindowHours),
+      promo_code: promoCode || null,
     };
 
     if (eventType) {
@@ -294,6 +340,113 @@ export function EventTypeForm({ eventType }: EventTypeFormProps) {
               Hide this event type (won&apos;t appear on your public page)
             </label>
           </div>
+
+          {/* Payment Section */}
+          {stripeConfigured !== null && (
+            <div className="border-t border-gray-200 pt-6 mt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <DollarSign className="h-5 w-5 text-gray-600" />
+                <h3 className="text-lg font-medium text-gray-900">Payment Settings</h3>
+              </div>
+
+              {!stripeConfigured ? (
+                <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <Info className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-900">
+                      Stripe not configured
+                    </p>
+                    <p className="text-sm text-amber-700 mt-1">
+                      To accept payments, add your Stripe API keys to your environment
+                      variables. Visit the{" "}
+                      <a href="/payments" className="underline font-medium">
+                        Payments page
+                      </a>{" "}
+                      for setup instructions.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="isPaid"
+                      checked={isPaid}
+                      onChange={(e) => setIsPaid(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <label htmlFor="isPaid" className="text-sm font-medium text-gray-700">
+                      Require payment for this event type
+                    </label>
+                  </div>
+
+                  {isPaid && (
+                    <div className="space-y-4 pl-6 border-l-2 border-blue-200">
+                      <div>
+                        <label
+                          htmlFor="price"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Price (USD)
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                            $
+                          </span>
+                          <input
+                            type="number"
+                            id="price"
+                            value={priceInDollars}
+                            onChange={(e) => setPriceInDollars(e.target.value)}
+                            placeholder="0.00"
+                            min="0.50"
+                            step="0.01"
+                            required={isPaid}
+                            className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Minimum $0.50 (Stripe requirement)
+                        </p>
+                      </div>
+
+                      <Select
+                        label="Refund window"
+                        id="refundWindowHours"
+                        value={refundWindowHours}
+                        onChange={(e) => setRefundWindowHours(e.target.value)}
+                        options={refundWindowOptions}
+                      />
+                      <p className="text-xs text-gray-500 -mt-3">
+                        Guests can get a full refund if they cancel before this time
+                      </p>
+
+                      <div>
+                        <label
+                          htmlFor="promoCode"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Promo code (optional)
+                        </label>
+                        <input
+                          type="text"
+                          id="promoCode"
+                          value={promoCode}
+                          onChange={(e) => setPromoCode(e.target.value)}
+                          placeholder="FREEMEETING"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Guests who enter this code can book for free
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
         <CardFooter className="flex justify-end gap-3">
           <Button

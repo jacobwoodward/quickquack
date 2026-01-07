@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getGoogleCalendarService } from "@/lib/google/calendar";
 import { sendBookingCancellation } from "@/lib/email/notifications";
+import { isEligibleForRefund, processRefund } from "@/lib/stripe";
 
 interface RouteParams {
   params: Promise<{ uid: string }>;
@@ -15,10 +16,18 @@ interface BookingWithRelations {
   start_time: string;
   end_time: string;
   status: string;
-  event_types: { title: string } | null;
+  payment_id: string | null;
+  event_types: { title: string; refund_window_hours: number } | null;
   attendees: Array<{ name: string; email: string; timezone: string }>;
   users: { name: string | null; email: string };
   booking_references: Array<{ credential_id: string; external_id: string; type: string }>;
+}
+
+interface PaymentRecord {
+  id: string;
+  stripe_payment_intent_id: string | null;
+  amount_cents: number;
+  status: string;
 }
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
@@ -34,7 +43,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .from("bookings")
       .select(`
         *,
-        event_types (title),
+        event_types (title, refund_window_hours),
         attendees (name, email, timezone),
         users!bookings_user_id_fkey (name, email),
         booking_references (credential_id, external_id, type)
@@ -56,6 +65,48 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         { error: "Booking is already cancelled" },
         { status: 400 }
       );
+    }
+
+    // Handle refund if there's a payment
+    let refundProcessed = false;
+    let refundId: string | undefined;
+
+    if (booking.payment_id) {
+      const { data: paymentData } = await supabase
+        .from("payments")
+        .select("id, stripe_payment_intent_id, amount_cents, status")
+        .eq("id", booking.payment_id)
+        .single();
+
+      const payment = paymentData as PaymentRecord | null;
+
+      if (payment && payment.status === "completed" && payment.stripe_payment_intent_id) {
+        const refundWindowHours = booking.event_types?.refund_window_hours || 24;
+        const bookingStartTime = new Date(booking.start_time);
+
+        if (isEligibleForRefund(bookingStartTime, refundWindowHours)) {
+          // Process refund
+          const refundResult = await processRefund(payment.stripe_payment_intent_id);
+
+          if (refundResult.success) {
+            refundProcessed = true;
+            refundId = refundResult.refundId;
+
+            // Update payment record
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await (supabase as any)
+              .from("payments")
+              .update({
+                status: "refunded",
+                refund_id: refundId,
+                refund_amount_cents: payment.amount_cents,
+              })
+              .eq("id", payment.id);
+          } else {
+            console.error("Failed to process refund:", refundResult.error);
+          }
+        }
+      }
     }
 
     // Update booking status
@@ -114,7 +165,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       }
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      refundProcessed,
+      refundId,
+    });
   } catch (error) {
     console.error("Cancel booking error:", error);
     return NextResponse.json(

@@ -7,12 +7,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, Globe, ChevronLeft, ChevronRight, Check, Video, MapPin, Phone, Link as LinkIcon } from "lucide-react";
+import { Calendar, Clock, Globe, ChevronLeft, ChevronRight, Check, Video, MapPin, Phone, Link as LinkIcon, DollarSign, Tag } from "lucide-react";
 import type { User, EventType, Schedule, Availability } from "@/lib/types/database";
+
+// Extended EventType with payment fields - using Omit to override the types
+type EventTypeWithPayment = Omit<EventType, 'is_paid' | 'price_cents' | 'promo_code' | 'refund_window_hours'> & {
+  is_paid: boolean;
+  price_cents: number | null;
+  promo_code: string | null;
+  refund_window_hours: number;
+};
 
 interface BookingPageProps {
   user: User;
-  eventType: EventType;
+  eventType: EventTypeWithPayment;
   schedule: (Schedule & { availability: Availability[] }) | null;
 }
 
@@ -63,7 +71,17 @@ export function BookingPage({ user, eventType, schedule }: BookingPageProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
+  const [promoCode, setPromoCode] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  // Payment helpers
+  const isPaidEvent = eventType.is_paid && eventType.price_cents && eventType.price_cents > 0;
+  const formatPrice = (cents: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(cents / 100);
+  };
 
   // Calculate booking window boundaries
   const today = startOfDay(new Date());
@@ -193,6 +211,40 @@ export function BookingPage({ user, eventType, schedule }: BookingPageProps) {
     setError(null);
 
     try {
+      // If this is a paid event, first check promo code or create checkout
+      if (isPaidEvent) {
+        const checkoutResponse = await fetch("/api/stripe/create-checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            eventTypeId: eventType.id,
+            date: format(selectedDate, "yyyy-MM-dd"),
+            time: selectedTime,
+            timezone: TIMEZONE,
+            name,
+            email,
+            notes,
+            promoCode: promoCode.trim() || undefined,
+          }),
+        });
+
+        const checkoutData = await checkoutResponse.json();
+
+        if (!checkoutResponse.ok) {
+          throw new Error(checkoutData.error || "Failed to initiate payment");
+        }
+
+        // If promo code was valid, proceed with free booking
+        if (checkoutData.freeBooking) {
+          // Fall through to create free booking below
+        } else if (checkoutData.checkoutUrl) {
+          // Redirect to Stripe Checkout
+          window.location.href = checkoutData.checkoutUrl;
+          return;
+        }
+      }
+
+      // Free booking (no payment required, or valid promo code)
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -260,6 +312,14 @@ export function BookingPage({ user, eventType, schedule }: BookingPageProps) {
                     <Globe className="w-4 h-4" />
                     <span>{TIMEZONE}</span>
                   </div>
+                  {isPaidEvent && eventType.price_cents && (
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4 text-green-600" />
+                      <span className="font-medium text-green-600">
+                        {formatPrice(eventType.price_cents)}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {eventType.description && (
@@ -471,12 +531,47 @@ export function BookingPage({ user, eventType, schedule }: BookingPageProps) {
                       placeholder="Please share anything that will help prepare for our meeting."
                     />
 
+                    {isPaidEvent && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Tag className="w-4 h-4 text-gray-400" />
+                          <label
+                            htmlFor="promoCode"
+                            className="text-sm font-medium text-gray-700"
+                          >
+                            Promo code (optional)
+                          </label>
+                        </div>
+                        <input
+                          type="text"
+                          id="promoCode"
+                          value={promoCode}
+                          onChange={(e) => setPromoCode(e.target.value)}
+                          placeholder="Enter code for free booking"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        />
+                      </div>
+                    )}
+
+                    {isPaidEvent && eventType.price_cents && (
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-600">Total</span>
+                        <span className="text-lg font-semibold text-gray-900">
+                          {formatPrice(eventType.price_cents)}
+                        </span>
+                      </div>
+                    )}
+
                     <Button
                       type="submit"
                       className="w-full"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? "Scheduling..." : "Schedule Meeting"}
+                      {isSubmitting
+                        ? "Processing..."
+                        : isPaidEvent
+                        ? "Continue to Payment"
+                        : "Schedule Meeting"}
                     </Button>
                   </form>
                 </div>

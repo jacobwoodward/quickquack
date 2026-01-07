@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cal-Lite - Simple Scheduling Made Lightweight",
-  description: "A fast, focused scheduling tool. Connect your Google Calendar, create event types, and let people book meetings with you.",
+  title: "Dashboard",
+  description: "Scheduling and booking management",
 };
 
 export default function RootLayout({

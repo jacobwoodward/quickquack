@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
         const result = await calendarService.createEvent({
           calendarId,
           summary: booking.title,
-          description: notes || `Booked via Cal-Lite`,
+          description: notes || "",
           startTime: startTimeUtc,
           endTime: endTimeUtc,
           attendees: [

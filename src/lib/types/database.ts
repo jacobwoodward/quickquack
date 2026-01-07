@@ -10,6 +10,8 @@ export type BookingStatus = "PENDING" | "ACCEPTED" | "CANCELLED" | "REJECTED";
 
 export type LocationType = "google_meet" | "in_person" | "phone" | "link";
 
+export type PaymentStatus = "pending" | "completed" | "refunded" | "failed";
+
 export type TimeFormat = "12h" | "24h";
 
 // Link-in-bio types
@@ -89,6 +91,10 @@ export interface Database {
           booking_window_days: number | null;
           position: number;
           schedule_id: string | null;
+          is_paid: boolean;
+          price_cents: number | null;
+          refund_window_hours: number;
+          promo_code: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -110,6 +116,10 @@ export interface Database {
           booking_window_days?: number | null;
           position?: number;
           schedule_id?: string | null;
+          is_paid?: boolean;
+          price_cents?: number | null;
+          refund_window_hours?: number;
+          promo_code?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -131,6 +141,10 @@ export interface Database {
           booking_window_days?: number | null;
           position?: number;
           schedule_id?: string | null;
+          is_paid?: boolean;
+          price_cents?: number | null;
+          refund_window_hours?: number;
+          promo_code?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -208,6 +222,7 @@ export interface Database {
           location_value: string | null;
           cancellation_reason: string | null;
           rescheduled_from_uid: string | null;
+          payment_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -225,6 +240,7 @@ export interface Database {
           location_value?: string | null;
           cancellation_reason?: string | null;
           rescheduled_from_uid?: string | null;
+          payment_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -242,6 +258,7 @@ export interface Database {
           location_value?: string | null;
           cancellation_reason?: string | null;
           rescheduled_from_uid?: string | null;
+          payment_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -371,6 +388,63 @@ export interface Database {
           external_id?: string;
           meeting_url?: string | null;
           created_at?: string;
+        };
+      };
+      // ========== PAYMENTS TABLE ==========
+      payments: {
+        Row: {
+          id: string;
+          booking_id: string | null;
+          stripe_payment_intent_id: string | null;
+          stripe_checkout_session_id: string;
+          amount_cents: number;
+          status: PaymentStatus;
+          refund_id: string | null;
+          refund_amount_cents: number | null;
+          event_type_id: string;
+          guest_email: string;
+          guest_name: string;
+          guest_timezone: string;
+          booking_start_time: string;
+          booking_notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          booking_id?: string | null;
+          stripe_payment_intent_id?: string | null;
+          stripe_checkout_session_id: string;
+          amount_cents: number;
+          status?: PaymentStatus;
+          refund_id?: string | null;
+          refund_amount_cents?: number | null;
+          event_type_id: string;
+          guest_email: string;
+          guest_name: string;
+          guest_timezone: string;
+          booking_start_time: string;
+          booking_notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          booking_id?: string | null;
+          stripe_payment_intent_id?: string | null;
+          stripe_checkout_session_id?: string;
+          amount_cents?: number;
+          status?: PaymentStatus;
+          refund_id?: string | null;
+          refund_amount_cents?: number | null;
+          event_type_id?: string;
+          guest_email?: string;
+          guest_name?: string;
+          guest_timezone?: string;
+          booking_start_time?: string;
+          booking_notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
       };
       // ========== LINK-IN-BIO TABLES ==========
@@ -623,6 +697,7 @@ export type Credential = Database["public"]["Tables"]["credentials"]["Row"];
 export type SelectedCalendar = Database["public"]["Tables"]["selected_calendars"]["Row"];
 export type DestinationCalendar = Database["public"]["Tables"]["destination_calendars"]["Row"];
 export type BookingReference = Database["public"]["Tables"]["booking_references"]["Row"];
+export type Payment = Database["public"]["Tables"]["payments"]["Row"];
 
 // Link-in-bio types
 export type PageSettings = Database["public"]["Tables"]["page_settings"]["Row"];

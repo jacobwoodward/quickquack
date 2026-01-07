@@ -15,6 +15,14 @@ interface BookingEmailParams {
   timezone: string;
   location?: string;
   bookingUid: string;
+  priceCents?: number;
+}
+
+function formatPrice(cents: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(cents / 100);
 }
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -40,13 +48,15 @@ export async function sendBookingConfirmation(params: BookingEmailParams) {
     timezone,
     location,
     bookingUid,
+    priceCents,
   } = params;
 
   const formattedTime = formatTimeInTimezone(startTime, timezone);
   const rescheduleUrl = `${appUrl}/reschedule/${bookingUid}`;
   const cancelUrl = `${appUrl}/cancel/${bookingUid}`;
 
-  const emailFrom = process.env.EMAIL_FROM || "Cal-Lite <bookings@cal-lite.app>";
+  const emailFrom = process.env.EMAIL_FROM || "Bookings <noreply@example.com>";
+  const isPaid = priceCents && priceCents > 0;
 
   try {
     await resend.emails.send({
@@ -88,6 +98,13 @@ export async function sendBookingConfirmation(params: BookingEmailParams) {
                 </p>
               </div>
               ` : ""}
+
+              ${isPaid ? `
+              <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                <p style="color: #666; font-size: 14px; margin: 0;">Payment</p>
+                <p style="color: #16a34a; font-size: 16px; margin: 4px 0 0 0; font-weight: 600;">${formatPrice(priceCents)} paid</p>
+              </div>
+              ` : ""}
             </div>
 
             <div style="text-align: center;">
@@ -96,7 +113,6 @@ export async function sendBookingConfirmation(params: BookingEmailParams) {
             </div>
 
             <p style="color: #999; font-size: 12px; text-align: center; margin-top: 32px;">
-              Powered by Cal-Lite
             </p>
           </body>
         </html>
@@ -108,7 +124,12 @@ export async function sendBookingConfirmation(params: BookingEmailParams) {
   }
 }
 
-export async function sendBookingCancellation(params: Omit<BookingEmailParams, "location">) {
+interface CancellationEmailParams extends Omit<BookingEmailParams, "location"> {
+  refunded?: boolean;
+  refundAmount?: number;
+}
+
+export async function sendBookingCancellation(params: CancellationEmailParams) {
   if (!resend) {
     console.log("Resend not configured, skipping email notification");
     return;
@@ -121,10 +142,14 @@ export async function sendBookingCancellation(params: Omit<BookingEmailParams, "
     eventTitle,
     startTime,
     timezone,
+    priceCents,
+    refunded,
+    refundAmount,
   } = params;
 
   const formattedTime = formatTimeInTimezone(startTime, timezone);
-  const emailFrom = process.env.EMAIL_FROM || "Cal-Lite <bookings@cal-lite.app>";
+  const emailFrom = process.env.EMAIL_FROM || "Bookings <noreply@example.com>";
+  const wasRefunded = refunded && refundAmount && refundAmount > 0;
 
   try {
     await resend.emails.send({
@@ -156,10 +181,22 @@ export async function sendBookingCancellation(params: Omit<BookingEmailParams, "
                 <p style="color: #666; font-size: 14px; margin: 0;">Who</p>
                 <p style="color: #999; font-size: 16px; margin: 4px 0 0 0;">${hostName}</p>
               </div>
+
+              ${wasRefunded ? `
+              <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                <p style="color: #666; font-size: 14px; margin: 0;">Refund</p>
+                <p style="color: #16a34a; font-size: 16px; margin: 4px 0 0 0; font-weight: 600;">${formatPrice(refundAmount)} refunded</p>
+                <p style="color: #666; font-size: 12px; margin: 4px 0 0 0;">The refund will appear on your statement within 5-10 business days.</p>
+              </div>
+              ` : priceCents && priceCents > 0 ? `
+              <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                <p style="color: #666; font-size: 14px; margin: 0;">Payment</p>
+                <p style="color: #999; font-size: 16px; margin: 4px 0 0 0;">${formatPrice(priceCents)} - No refund (outside refund window)</p>
+              </div>
+              ` : ""}
             </div>
 
             <p style="color: #999; font-size: 12px; text-align: center; margin-top: 32px;">
-              Powered by Cal-Lite
             </p>
           </body>
         </html>
@@ -193,7 +230,7 @@ export async function sendBookingRescheduled(params: BookingEmailParams & { newS
   const newTime = formatTimeInTimezone(newStartTime, timezone);
   const rescheduleUrl = `${appUrl}/reschedule/${bookingUid}`;
   const cancelUrl = `${appUrl}/cancel/${bookingUid}`;
-  const emailFrom = process.env.EMAIL_FROM || "Cal-Lite <bookings@cal-lite.app>";
+  const emailFrom = process.env.EMAIL_FROM || "Bookings <noreply@example.com>";
 
   try {
     await resend.emails.send({
@@ -248,7 +285,6 @@ export async function sendBookingRescheduled(params: BookingEmailParams & { newS
             </div>
 
             <p style="color: #999; font-size: 12px; text-align: center; margin-top: 32px;">
-              Powered by Cal-Lite
             </p>
           </body>
         </html>
