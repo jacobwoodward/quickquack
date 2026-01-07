@@ -1,4 +1,4 @@
--- Cal-Lite Database Schema
+-- QuickQuack Database Schema
 -- Initial migration
 
 -- Enable UUID extension

@@ -2,11 +2,23 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/lib/types/database";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://xeneiphimncmnuozfavw.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlbmVpcGhpbW5jbW51b3pmYXZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDkyMzQsImV4cCI6MjA4MzI4NTIzNH0.xfFmWqDp0QxnydQw1SYYghBOR3eCg6fzOilf9EuNCC4";
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "sb_secret_PtYqVQ7pDFp0fhjoyeCWiA_V6fkCYPd";
+function getSupabaseConfig() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error(
+      "Missing Supabase configuration. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables. " +
+      "Visit /setup for configuration help."
+    );
+  }
+
+  return { supabaseUrl, supabaseAnonKey, supabaseServiceRoleKey };
+}
 
 export async function createClient() {
+  const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
@@ -33,7 +45,15 @@ export async function createClient() {
 }
 
 export async function createServiceClient() {
+  const { supabaseUrl, supabaseServiceRoleKey } = getSupabaseConfig();
   const cookieStore = await cookies();
+
+  if (!supabaseServiceRoleKey) {
+    throw new Error(
+      "Missing SUPABASE_SERVICE_ROLE_KEY environment variable. " +
+      "This is required for admin operations. Visit /setup for configuration help."
+    );
+  }
 
   return createServerClient<Database>(
     supabaseUrl,

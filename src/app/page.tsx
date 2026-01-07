@@ -4,24 +4,30 @@ import { PublicPage } from "@/components/public/public-page";
 import type { Metadata } from "next";
 import type { User, EventType, PageSettings, Link, SocialProfile } from "@/lib/types/database";
 
-// Single-user app - this is the default username
-const DEFAULT_USERNAME = "jacobwoodward";
-
-export async function generateMetadata(): Promise<Metadata> {
+/**
+ * Get the single user for this self-hosted instance.
+ * In a single-user app, we just get the first (and only) user.
+ */
+async function getSingleUser() {
   const supabase = await createServiceClient();
 
-  // Find user by username
   const { data: userData } = await supabase
     .from("users")
     .select("*")
-    .eq("username", DEFAULT_USERNAME)
+    .limit(1)
     .single();
 
-  const user = userData as User | null;
+  return userData as User | null;
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const user = await getSingleUser();
 
   if (!user) {
-    return { title: "Not Found" };
+    return { title: "QuickQuack" };
   }
+
+  const supabase = await createServiceClient();
 
   // Get page settings
   const { data: pageSettingsData } = await supabase
@@ -32,8 +38,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const pageSettings = pageSettingsData as { page_title: string | null; bio: string | null } | null;
 
-  const title = pageSettings?.page_title || user.name || DEFAULT_USERNAME;
-  const description = pageSettings?.bio || `Book time with ${user.name || DEFAULT_USERNAME}`;
+  const title = pageSettings?.page_title || user.name || "QuickQuack";
+  const description = pageSettings?.bio || `Book time with ${user.name || "me"}`;
 
   return {
     title,
@@ -44,11 +50,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Home() {
   const supabase = await createServiceClient();
 
-  // Find user by username
+  // Single-user app: get the first (and only) user
   const { data: userData } = await supabase
     .from("users")
     .select("*")
-    .eq("username", DEFAULT_USERNAME)
+    .limit(1)
     .single();
 
   const user = userData as User | null;

@@ -136,7 +136,7 @@ export class GoogleCalendarService {
     if (params.createMeet) {
       eventData.conferenceData = {
         createRequest: {
-          requestId: `cal-lite-${Date.now()}`,
+          requestId: `quickquack-${Date.now()}`,
           conferenceSolutionKey: {
             type: "hangoutsMeet",
           },

@@ -1,142 +1,236 @@
-# Cal-Lite
+# QuickQuack
 
-A lightweight, single-user scheduling application built with Next.js 15, Supabase, and Google Calendar integration.
+A free, open-source scheduling app you can host yourself. Let people book time on your calendar without the monthly fees.
 
-## Features
+## What is QuickQuack?
 
-- **Event Types**: Create different meeting types (30 min, 1 hour, etc.) with custom settings
-- **Availability Management**: Set your weekly working hours and date-specific overrides
-- **Google Calendar Integration**:
-  - Check for conflicts across multiple calendars
-  - Auto-create events with Google Meet links
-  - Two-way sync with your calendar
-- **Public Booking Pages**: Shareable links for each event type
-- **Guest Self-Service**: Attendees can reschedule or cancel their bookings
-- **Email Notifications**: Confirmation, reschedule, and cancellation emails
+QuickQuack is a self-hosted alternative to Calendly and Cal.com. It connects to your Google Calendar to:
 
-## Tech Stack
+- **Show your availability** - Automatically detect busy times from your calendar
+- **Let people book meetings** - Share a link and let guests pick a time that works
+- **Create calendar events** - Automatically add meetings to your calendar with Google Meet links
+- **Send notifications** - Email confirmations, reminders, and updates
 
-- **Frontend**: Next.js 15 (App Router), React, Tailwind CSS
-- **Database**: Supabase (PostgreSQL)
-- **Auth**: Supabase Auth with Google OAuth
-- **Calendar**: Google Calendar API
-- **Email**: Resend
-- **Date/Time**: date-fns, date-fns-tz
+### Why Self-Host?
 
-## Getting Started
+- **Free forever** - No subscription fees, no per-booking limits
+- **Own your data** - Your calendar data stays in your own database
+- **Customize everything** - Change colors, wording, or even the code
+- **Privacy-focused** - No tracking, no selling your data
 
-### 1. Prerequisites
+## Quick Start
 
-- Node.js 18+
-- A Supabase account
-- A Google Cloud Console project with Calendar API enabled
-- A Resend account (for email notifications)
+You'll need accounts on these free services:
+- [Supabase](https://supabase.com) - Database & authentication (free tier)
+- [Google Cloud](https://console.cloud.google.com) - Calendar integration (free)
+- [Vercel](https://vercel.com) - Hosting (free tier)
 
-### 2. Clone and Install
+### Video Tutorial
 
-```bash
-cd cal-lite
-npm install
-```
+[Coming Soon] - A step-by-step video walkthrough of the setup process.
 
-### 3. Set Up Supabase
+---
 
-1. Create a new Supabase project
-2. Go to the SQL Editor and run the migration in `supabase/migrations/00001_initial_schema.sql`
-3. Go to Project Settings > API to get your URL and keys
+## Setup Guide
 
-### 4. Set Up Google OAuth
+### Step 1: Fork and Clone
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a new project (or select existing)
-3. Enable the Google Calendar API
-4. Go to Credentials > Create Credentials > OAuth Client ID
-5. Add authorized redirect URI: `https://YOUR_SUPABASE_PROJECT.supabase.co/auth/v1/callback`
-6. Copy the Client ID and Secret
+1. Click the **Fork** button at the top of this repository
+2. Clone your forked repository:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/quickquack.git
+   cd quickquack
+   npm install
+   ```
 
-### 5. Configure Supabase Auth
+### Step 2: Set Up Supabase (Database)
 
-1. In Supabase Dashboard, go to Authentication > Providers
-2. Enable Google provider
-3. Add your Google Client ID and Secret
-4. Add authorized redirect URLs
+1. Go to [supabase.com](https://supabase.com) and create a free account
+2. Click **New Project** and fill in the details
+3. Wait for your project to be created (takes about 2 minutes)
 
-### 6. Configure Environment
+**Run the database migrations:**
 
-Copy `.env.example` to `.env.local` and fill in your values:
+4. In your Supabase dashboard, click **SQL Editor** in the sidebar
+5. Open the file `supabase/migrations/00001_initial_schema.sql` from this repository
+6. Copy the entire contents and paste into the SQL Editor
+7. Click **Run** to execute
+8. Repeat for:
+   - `00002_add_payments.sql`
+   - `00003_email_templates.sql`
 
-```bash
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+**Get your API keys:**
 
-# Google OAuth & Calendar
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+9. Click **Settings** (gear icon) → **API**
+10. Copy these values (you'll need them later):
+    - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
+    - **anon public** key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+    - **service_role** key → `SUPABASE_SERVICE_ROLE_KEY`
 
-# App
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+### Step 3: Set Up Google OAuth (Sign In & Calendar)
 
-# Email (Resend)
-RESEND_API_KEY=your-resend-api-key
-EMAIL_FROM=Cal-Lite <bookings@yourdomain.com>
-```
+**Create a Google Cloud Project:**
 
-### 7. Run the App
+1. Go to [console.cloud.google.com](https://console.cloud.google.com)
+2. Click the project dropdown at the top → **New Project**
+3. Name it "QuickQuack" and click **Create**
 
-```bash
-npm run dev
-```
+**Enable the Calendar API:**
 
-Open [http://localhost:3000](http://localhost:3000)
+4. Make sure your new project is selected
+5. Go to **APIs & Services** → **Library**
+6. Search for "Google Calendar API" and click it
+7. Click **Enable**
 
-## Project Structure
+**Create OAuth Credentials:**
 
-```
-cal-lite/
-├── src/
-│   ├── app/
-│   │   ├── (auth)/login/      # Login page
-│   │   ├── (dashboard)/       # Protected dashboard routes
-│   │   │   ├── dashboard/     # Main dashboard
-│   │   │   ├── event-types/   # Event type management
-│   │   │   ├── availability/  # Schedule settings
-│   │   │   └── settings/      # Profile & calendar settings
-│   │   ├── book/[username]/   # Public booking pages
-│   │   ├── reschedule/[uid]/  # Guest reschedule
-│   │   ├── cancel/[uid]/      # Guest cancel
-│   │   ├── auth/callback/     # OAuth callback
-│   │   └── api/               # API routes
-│   ├── components/
-│   │   ├── ui/                # Reusable UI components
-│   │   ├── dashboard/         # Dashboard components
-│   │   ├── event-types/       # Event type components
-│   │   ├── booking/           # Booking flow components
-│   │   └── availability/      # Availability editor
-│   └── lib/
-│       ├── supabase/          # Supabase clients
-│       ├── google/            # Google Calendar service
-│       ├── availability/      # Slot calculation
-│       ├── email/             # Email notifications
-│       └── types/             # TypeScript types
-└── supabase/
-    └── migrations/            # SQL migrations
-```
+8. Go to **APIs & Services** → **Credentials**
+9. Click **+ Create Credentials** → **OAuth client ID**
+10. If prompted to configure consent screen:
+    - Choose **External** and click **Create**
+    - Fill in App name: "QuickQuack"
+    - Add your email as support email and developer contact
+    - Click **Save and Continue** through the remaining screens
+11. Back in Credentials, click **+ Create Credentials** → **OAuth client ID**
+12. Choose **Web application**
+13. Name: "QuickQuack Web"
+14. Under **Authorized redirect URIs**, click **+ Add URI** and enter:
+    ```
+    https://YOUR_SUPABASE_PROJECT.supabase.co/auth/v1/callback
+    ```
+    (Replace YOUR_SUPABASE_PROJECT with your actual Supabase project ID from the URL)
+15. Click **Create**
+16. Copy the **Client ID** and **Client Secret** (you'll need these next)
 
-## Deployment
+**Enable Google in Supabase:**
 
-### Deploy to Vercel
+17. Back in Supabase, go to **Authentication** → **Providers**
+18. Find **Google** and toggle it on
+19. Paste your **Client ID** and **Client Secret**
+20. Click **Save**
 
-1. Push to GitHub
-2. Import to Vercel
-3. Add environment variables
-4. Deploy
+### Step 4: Deploy to Vercel
 
-Make sure to update:
-- `NEXT_PUBLIC_APP_URL` to your production URL
-- Google OAuth authorized redirect URIs
+1. Go to [vercel.com](https://vercel.com) and sign in with GitHub
+2. Click **Add New** → **Project**
+3. Find your forked quickquack repository and click **Import**
+4. Before deploying, expand **Environment Variables** and add:
+
+| Name | Value |
+|------|-------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Your Supabase service role key |
+| `GOOGLE_CLIENT_ID` | Your Google OAuth Client ID |
+| `GOOGLE_CLIENT_SECRET` | Your Google OAuth Client Secret |
+| `NEXT_PUBLIC_APP_URL` | Your Vercel URL (e.g., `https://quickquack.vercel.app`) |
+
+5. Click **Deploy**
+
+**After deployment:**
+
+6. Copy your deployment URL (e.g., `https://quickquack-abc123.vercel.app`)
+7. Go back to Google Cloud Console → **Credentials** → Your OAuth client
+8. Add another redirect URI:
+   ```
+   https://YOUR_VERCEL_URL.vercel.app/auth/callback
+   ```
+9. Update `NEXT_PUBLIC_APP_URL` in Vercel to match your URL
+
+### Step 5: First Login
+
+1. Visit your deployed app
+2. Click **Sign in with Google**
+3. Authorize access to your calendar
+4. You're in! Start creating event types.
+
+---
+
+## Optional Features
+
+### Email Notifications (Resend)
+
+Send booking confirmations and reminders via email:
+
+1. Create a free account at [resend.com](https://resend.com)
+2. Go to **API Keys** and create a new key
+3. Add to Vercel environment variables:
+   - `RESEND_API_KEY` - Your Resend API key
+   - `EMAIL_FROM` - e.g., `QuickQuack <bookings@yourdomain.com>`
+
+For sending from your own domain, you'll need to verify it in Resend.
+
+### Paid Bookings (Stripe)
+
+Accept payments for consultations:
+
+1. Create a [Stripe](https://stripe.com) account
+2. Get your secret key from **Developers** → **API keys**
+3. Create a webhook endpoint pointing to `https://your-app.com/api/stripe/webhook`
+4. Add to Vercel:
+   - `STRIPE_SECRET_KEY` - Your Stripe secret key
+   - `STRIPE_WEBHOOK_SECRET` - Your webhook signing secret
+
+### Automated Reminders (Vercel Cron)
+
+Send reminder emails before meetings:
+
+1. The cron job is already configured in `vercel.json`
+2. Add a security secret:
+   - Generate one: `openssl rand -base64 32`
+   - Add `CRON_SECRET` to your Vercel environment variables
+
+---
+
+## Troubleshooting
+
+### "Google OAuth is not configured"
+- Make sure you've enabled the Google provider in Supabase
+- Check that your Client ID and Secret are correct
+- Verify your redirect URIs include your Supabase callback URL
+
+### "Authentication failed"
+- Make sure the Calendar API is enabled in Google Cloud Console
+- Check that you've approved the consent screen
+
+### Calendar events not being created
+- Re-authenticate: Log out and log back in to refresh your Google tokens
+- Check that you've selected calendars in Settings
+
+### Visit `/setup`
+Your app has a built-in configuration checker. Visit `/setup` to see which services are configured correctly.
+
+---
+
+## Custom Domain
+
+1. In Vercel, go to your project → **Settings** → **Domains**
+2. Add your custom domain
+3. Update DNS records as instructed
+4. Update `NEXT_PUBLIC_APP_URL` to your new domain
+5. Add the new callback URL to Google OAuth credentials:
+   ```
+   https://your-domain.com/auth/callback
+   ```
+
+---
+
+## Updating
+
+To get the latest features:
+
+1. Sync your fork with the original repository
+2. Vercel will automatically redeploy
+
+---
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/yourusername/quickquack/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/quickquack/discussions)
+
+---
 
 ## License
 
-MIT
+MIT License - Use it however you want, just don't blame us if something breaks.

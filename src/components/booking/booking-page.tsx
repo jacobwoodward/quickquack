@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { format, addDays, startOfDay, isBefore, isAfter, isSameDay } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
+import { format, addDays, startOfDay, isBefore, isAfter, isSameDay, addMinutes } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar, Clock, Globe, ChevronLeft, ChevronRight, Check, Video, MapPin, Phone, Link as LinkIcon, DollarSign, Tag } from "lucide-react";
+import { CalendarLinks } from "@/components/booking/calendar-links";
 import type { User, EventType, Schedule, Availability } from "@/lib/types/database";
 
 // Extended EventType with payment fields - using Omit to override the types
@@ -608,12 +609,50 @@ export function BookingPage({ user, eventType, schedule }: BookingPageProps) {
                       href={meetingUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                      className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-6"
                     >
                       <Video className="w-4 h-4" />
                       Open Google Meet link
                     </a>
                   )}
+
+                  {selectedDate && selectedTime && bookingUid && (() => {
+                    // Parse the selected time and create proper Date objects
+                    const is12Hour = /am|pm/i.test(selectedTime);
+                    let hours = 0;
+                    let minutes = 0;
+
+                    if (is12Hour) {
+                      const match = selectedTime.match(/(\d+):(\d+)\s*(am|pm)/i);
+                      if (match) {
+                        hours = parseInt(match[1]);
+                        minutes = parseInt(match[2]);
+                        const isPM = match[3].toLowerCase() === 'pm';
+                        if (isPM && hours !== 12) hours += 12;
+                        if (!isPM && hours === 12) hours = 0;
+                      }
+                    } else {
+                      const [h, m] = selectedTime.split(':').map(Number);
+                      hours = h;
+                      minutes = m;
+                    }
+
+                    const localDate = new Date(selectedDate);
+                    localDate.setHours(hours, minutes, 0, 0);
+                    const startTimeUtc = fromZonedTime(localDate, TIMEZONE);
+                    const endTimeUtc = addMinutes(startTimeUtc, eventType.length);
+
+                    return (
+                      <CalendarLinks
+                        title={eventType.title}
+                        description={notes || eventType.description || undefined}
+                        startTime={startTimeUtc}
+                        endTime={endTimeUtc}
+                        location={meetingUrl || eventType.location_value || undefined}
+                        uid={bookingUid}
+                      />
+                    );
+                  })()}
                 </div>
               )}
             </div>

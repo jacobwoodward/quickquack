@@ -1,6 +1,12 @@
 import { Resend } from "resend";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
+import {
+  generateICS,
+  generateGoogleCalendarUrl,
+  generateOutlookUrl,
+  generateYahooCalendarUrl,
+} from "@/lib/calendar/ics";
 
 // Only initialize Resend if API key is present
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
@@ -9,6 +15,7 @@ interface BookingEmailParams {
   to: string;
   guestName: string;
   hostName: string;
+  hostEmail?: string;
   eventTitle: string;
   startTime: Date;
   endTime: Date;
@@ -16,6 +23,15 @@ interface BookingEmailParams {
   location?: string;
   bookingUid: string;
   priceCents?: number;
+  description?: string;
+}
+
+interface EmailTemplate {
+  subject?: string;
+  greeting?: string;
+  body_text?: string;
+  footer_text?: string;
+  is_enabled?: boolean;
 }
 
 function formatPrice(cents: number): string {
@@ -32,9 +48,97 @@ function formatTimeInTimezone(date: Date, timezone: string): string {
   return format(zonedDate, "EEEE, MMMM d, yyyy 'at' h:mm a");
 }
 
-export async function sendBookingConfirmation(params: BookingEmailParams) {
+/**
+ * Generate calendar links HTML section
+ */
+function generateCalendarLinksHtml(params: {
+  title: string;
+  description?: string;
+  startTime: Date;
+  endTime: Date;
+  location?: string;
+  hostName: string;
+  hostEmail?: string;
+  guestName: string;
+  guestEmail: string;
+  uid: string;
+}): string {
+  const icsParams = {
+    title: params.title,
+    description: params.description,
+    startTime: params.startTime,
+    endTime: params.endTime,
+    location: params.location,
+    organizer: params.hostEmail
+      ? { name: params.hostName, email: params.hostEmail }
+      : undefined,
+    attendee: { name: params.guestName, email: params.guestEmail },
+    uid: params.uid,
+  };
+
+  const googleUrl = generateGoogleCalendarUrl(icsParams);
+  const outlookUrl = generateOutlookUrl(icsParams);
+  const yahooUrl = generateYahooCalendarUrl(icsParams);
+
+  return `
+    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+      <p style="color: #666; font-size: 14px; margin: 0 0 8px 0;">Add to Calendar</p>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="${googleUrl}" target="_blank" style="display: inline-block; padding: 8px 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; color: #333; text-decoration: none; font-size: 14px;">Google</a>
+        <a href="${outlookUrl}" target="_blank" style="display: inline-block; padding: 8px 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; color: #333; text-decoration: none; font-size: 14px;">Outlook</a>
+        <a href="${yahooUrl}" target="_blank" style="display: inline-block; padding: 8px 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; color: #333; text-decoration: none; font-size: 14px;">Yahoo</a>
+      </div>
+      <p style="color: #999; font-size: 12px; margin: 8px 0 0 0;">Or download the attached .ics file to add to any calendar app.</p>
+    </div>
+  `;
+}
+
+/**
+ * Generate ICS attachment for emails
+ */
+function generateICSAttachment(params: {
+  title: string;
+  description?: string;
+  startTime: Date;
+  endTime: Date;
+  location?: string;
+  hostName: string;
+  hostEmail?: string;
+  guestName: string;
+  guestEmail: string;
+  uid: string;
+}): { filename: string; content: string } {
+  const icsContent = generateICS({
+    title: params.title,
+    description: params.description,
+    startTime: params.startTime,
+    endTime: params.endTime,
+    location: params.location,
+    organizer: params.hostEmail
+      ? { name: params.hostName, email: params.hostEmail }
+      : undefined,
+    attendee: { name: params.guestName, email: params.guestEmail },
+    uid: params.uid,
+  });
+
+  return {
+    filename: "invite.ics",
+    content: Buffer.from(icsContent).toString("base64"),
+  };
+}
+
+export async function sendBookingConfirmation(
+  params: BookingEmailParams,
+  template?: EmailTemplate
+) {
   if (!resend) {
     console.log("Resend not configured, skipping email notification");
+    return;
+  }
+
+  // Check if template is disabled
+  if (template && template.is_enabled === false) {
+    console.log("Confirmation email template is disabled, skipping");
     return;
   }
 
@@ -42,6 +146,7 @@ export async function sendBookingConfirmation(params: BookingEmailParams) {
     to,
     guestName,
     hostName,
+    hostEmail,
     eventTitle,
     startTime,
     endTime,
@@ -49,20 +154,68 @@ export async function sendBookingConfirmation(params: BookingEmailParams) {
     location,
     bookingUid,
     priceCents,
+    description,
   } = params;
 
   const formattedTime = formatTimeInTimezone(startTime, timezone);
   const rescheduleUrl = `${appUrl}/reschedule/${bookingUid}`;
   const cancelUrl = `${appUrl}/cancel/${bookingUid}`;
 
-  const emailFrom = process.env.EMAIL_FROM || "Bookings <noreply@example.com>";
+  const emailFrom = process.env.EMAIL_FROM || "QuickQuack <noreply@example.com>";
   const isPaid = priceCents && priceCents > 0;
+
+  // Use template values if provided, otherwise use defaults
+  const subject = template?.subject
+    ? template.subject
+        .replace("{{eventTitle}}", eventTitle)
+        .replace("{{hostName}}", hostName)
+        .replace("{{guestName}}", guestName)
+    : `Confirmed: ${eventTitle} with ${hostName}`;
+
+  const greeting = template?.greeting
+    ? template.greeting.replace("{{guestName}}", guestName)
+    : "Your meeting has been scheduled!";
+
+  const footerText = template?.footer_text || "";
+
+  // Generate calendar links and ICS attachment
+  const calendarLinksHtml = generateCalendarLinksHtml({
+    title: eventTitle,
+    description,
+    startTime,
+    endTime,
+    location,
+    hostName,
+    hostEmail,
+    guestName,
+    guestEmail: to,
+    uid: bookingUid,
+  });
+
+  const icsAttachment = generateICSAttachment({
+    title: eventTitle,
+    description,
+    startTime,
+    endTime,
+    location,
+    hostName,
+    hostEmail,
+    guestName,
+    guestEmail: to,
+    uid: bookingUid,
+  });
 
   try {
     await resend.emails.send({
       from: emailFrom,
       to,
-      subject: `Confirmed: ${eventTitle} with ${hostName}`,
+      subject,
+      attachments: [
+        {
+          filename: icsAttachment.filename,
+          content: icsAttachment.content,
+        },
+      ],
       html: `
         <!DOCTYPE html>
         <html>
@@ -73,7 +226,7 @@ export async function sendBookingConfirmation(params: BookingEmailParams) {
           <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: #f8fafc; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
               <h1 style="color: #1a1a1a; font-size: 24px; margin: 0 0 8px 0;">Meeting Confirmed</h1>
-              <p style="color: #666; margin: 0;">Your meeting has been scheduled!</p>
+              <p style="color: #666; margin: 0;">${greeting}</p>
             </div>
 
             <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
@@ -105,6 +258,8 @@ export async function sendBookingConfirmation(params: BookingEmailParams) {
                 <p style="color: #16a34a; font-size: 16px; margin: 4px 0 0 0; font-weight: 600;">${formatPrice(priceCents)} paid</p>
               </div>
               ` : ""}
+
+              ${calendarLinksHtml}
             </div>
 
             <div style="text-align: center;">
@@ -112,8 +267,11 @@ export async function sendBookingConfirmation(params: BookingEmailParams) {
               <a href="${cancelUrl}" style="display: inline-block; color: #dc2626; text-decoration: none;">Cancel</a>
             </div>
 
+            ${footerText ? `
             <p style="color: #999; font-size: 12px; text-align: center; margin-top: 32px;">
+              ${footerText}
             </p>
+            ` : ""}
           </body>
         </html>
       `,
@@ -129,9 +287,18 @@ interface CancellationEmailParams extends Omit<BookingEmailParams, "location"> {
   refundAmount?: number;
 }
 
-export async function sendBookingCancellation(params: CancellationEmailParams) {
+export async function sendBookingCancellation(
+  params: CancellationEmailParams,
+  template?: EmailTemplate
+) {
   if (!resend) {
     console.log("Resend not configured, skipping email notification");
+    return;
+  }
+
+  // Check if template is disabled
+  if (template && template.is_enabled === false) {
+    console.log("Cancellation email template is disabled, skipping");
     return;
   }
 
@@ -148,14 +315,28 @@ export async function sendBookingCancellation(params: CancellationEmailParams) {
   } = params;
 
   const formattedTime = formatTimeInTimezone(startTime, timezone);
-  const emailFrom = process.env.EMAIL_FROM || "Bookings <noreply@example.com>";
+  const emailFrom = process.env.EMAIL_FROM || "QuickQuack <noreply@example.com>";
   const wasRefunded = refunded && refundAmount && refundAmount > 0;
+
+  // Use template values if provided
+  const subject = template?.subject
+    ? template.subject
+        .replace("{{eventTitle}}", eventTitle)
+        .replace("{{hostName}}", hostName)
+        .replace("{{guestName}}", guestName)
+    : `Cancelled: ${eventTitle} with ${hostName}`;
+
+  const greeting = template?.greeting
+    ? template.greeting.replace("{{guestName}}", guestName)
+    : "Your meeting has been cancelled.";
+
+  const footerText = template?.footer_text || "";
 
   try {
     await resend.emails.send({
       from: emailFrom,
       to,
-      subject: `Cancelled: ${eventTitle} with ${hostName}`,
+      subject,
       html: `
         <!DOCTYPE html>
         <html>
@@ -166,7 +347,7 @@ export async function sendBookingCancellation(params: CancellationEmailParams) {
           <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: #fef2f2; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
               <h1 style="color: #dc2626; font-size: 24px; margin: 0 0 8px 0;">Meeting Cancelled</h1>
-              <p style="color: #666; margin: 0;">Your meeting has been cancelled.</p>
+              <p style="color: #666; margin: 0;">${greeting}</p>
             </div>
 
             <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
@@ -196,8 +377,11 @@ export async function sendBookingCancellation(params: CancellationEmailParams) {
               ` : ""}
             </div>
 
+            ${footerText ? `
             <p style="color: #999; font-size: 12px; text-align: center; margin-top: 32px;">
+              ${footerText}
             </p>
+            ` : ""}
           </body>
         </html>
       `,
@@ -208,9 +392,18 @@ export async function sendBookingCancellation(params: CancellationEmailParams) {
   }
 }
 
-export async function sendBookingRescheduled(params: BookingEmailParams & { newStartTime: Date }) {
+export async function sendBookingRescheduled(
+  params: BookingEmailParams & { newStartTime: Date; newEndTime: Date },
+  template?: EmailTemplate
+) {
   if (!resend) {
     console.log("Resend not configured, skipping email notification");
+    return;
+  }
+
+  // Check if template is disabled
+  if (template && template.is_enabled === false) {
+    console.log("Rescheduled email template is disabled, skipping");
     return;
   }
 
@@ -218,25 +411,75 @@ export async function sendBookingRescheduled(params: BookingEmailParams & { newS
     to,
     guestName,
     hostName,
+    hostEmail,
     eventTitle,
     startTime,
     newStartTime,
+    newEndTime,
     timezone,
     location,
     bookingUid,
+    description,
   } = params;
 
   const oldTime = formatTimeInTimezone(startTime, timezone);
   const newTime = formatTimeInTimezone(newStartTime, timezone);
   const rescheduleUrl = `${appUrl}/reschedule/${bookingUid}`;
   const cancelUrl = `${appUrl}/cancel/${bookingUid}`;
-  const emailFrom = process.env.EMAIL_FROM || "Bookings <noreply@example.com>";
+  const emailFrom = process.env.EMAIL_FROM || "QuickQuack <noreply@example.com>";
+
+  // Use template values if provided
+  const subject = template?.subject
+    ? template.subject
+        .replace("{{eventTitle}}", eventTitle)
+        .replace("{{hostName}}", hostName)
+        .replace("{{guestName}}", guestName)
+    : `Rescheduled: ${eventTitle} with ${hostName}`;
+
+  const greeting = template?.greeting
+    ? template.greeting.replace("{{guestName}}", guestName)
+    : "Your meeting has been moved to a new time.";
+
+  const footerText = template?.footer_text || "";
+
+  // Generate calendar links and ICS attachment with NEW times
+  const calendarLinksHtml = generateCalendarLinksHtml({
+    title: eventTitle,
+    description,
+    startTime: newStartTime,
+    endTime: newEndTime,
+    location,
+    hostName,
+    hostEmail,
+    guestName,
+    guestEmail: to,
+    uid: bookingUid,
+  });
+
+  const icsAttachment = generateICSAttachment({
+    title: eventTitle,
+    description,
+    startTime: newStartTime,
+    endTime: newEndTime,
+    location,
+    hostName,
+    hostEmail,
+    guestName,
+    guestEmail: to,
+    uid: bookingUid,
+  });
 
   try {
     await resend.emails.send({
       from: emailFrom,
       to,
-      subject: `Rescheduled: ${eventTitle} with ${hostName}`,
+      subject,
+      attachments: [
+        {
+          filename: icsAttachment.filename,
+          content: icsAttachment.content,
+        },
+      ],
       html: `
         <!DOCTYPE html>
         <html>
@@ -247,7 +490,7 @@ export async function sendBookingRescheduled(params: BookingEmailParams & { newS
           <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: #fef3c7; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
               <h1 style="color: #d97706; font-size: 24px; margin: 0 0 8px 0;">Meeting Rescheduled</h1>
-              <p style="color: #666; margin: 0;">Your meeting has been moved to a new time.</p>
+              <p style="color: #666; margin: 0;">${greeting}</p>
             </div>
 
             <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
@@ -277,6 +520,8 @@ export async function sendBookingRescheduled(params: BookingEmailParams & { newS
                 </p>
               </div>
               ` : ""}
+
+              ${calendarLinksHtml}
             </div>
 
             <div style="text-align: center;">
@@ -284,14 +529,176 @@ export async function sendBookingRescheduled(params: BookingEmailParams & { newS
               <a href="${cancelUrl}" style="display: inline-block; color: #dc2626; text-decoration: none;">Cancel</a>
             </div>
 
+            ${footerText ? `
             <p style="color: #999; font-size: 12px; text-align: center; margin-top: 32px;">
+              ${footerText}
             </p>
+            ` : ""}
           </body>
         </html>
       `,
     });
   } catch (error) {
     console.error("Failed to send rescheduled email:", error);
+    throw error;
+  }
+}
+
+/**
+ * Send a reminder email before a booking
+ */
+export async function sendBookingReminder(
+  params: BookingEmailParams,
+  template?: EmailTemplate
+) {
+  if (!resend) {
+    console.log("Resend not configured, skipping email notification");
+    return;
+  }
+
+  // Check if template is disabled
+  if (template && template.is_enabled === false) {
+    console.log("Reminder email template is disabled, skipping");
+    return;
+  }
+
+  const {
+    to,
+    guestName,
+    hostName,
+    hostEmail,
+    eventTitle,
+    startTime,
+    endTime,
+    timezone,
+    location,
+    bookingUid,
+    description,
+  } = params;
+
+  const formattedTime = formatTimeInTimezone(startTime, timezone);
+  const rescheduleUrl = `${appUrl}/reschedule/${bookingUid}`;
+  const cancelUrl = `${appUrl}/cancel/${bookingUid}`;
+
+  const emailFrom = process.env.EMAIL_FROM || "QuickQuack <noreply@example.com>";
+
+  // Use template values if provided
+  const subject = template?.subject
+    ? template.subject
+        .replace("{{eventTitle}}", eventTitle)
+        .replace("{{hostName}}", hostName)
+        .replace("{{guestName}}", guestName)
+    : `Reminder: ${eventTitle} with ${hostName} - Starting Soon`;
+
+  const greeting = template?.greeting
+    ? template.greeting.replace("{{guestName}}", guestName)
+    : "Your meeting is starting soon!";
+
+  const bodyText = template?.body_text
+    ? template.body_text.replace("{{guestName}}", guestName)
+    : "";
+
+  const footerText = template?.footer_text || "";
+
+  // Generate calendar links and ICS attachment
+  const calendarLinksHtml = generateCalendarLinksHtml({
+    title: eventTitle,
+    description,
+    startTime,
+    endTime,
+    location,
+    hostName,
+    hostEmail,
+    guestName,
+    guestEmail: to,
+    uid: bookingUid,
+  });
+
+  const icsAttachment = generateICSAttachment({
+    title: eventTitle,
+    description,
+    startTime,
+    endTime,
+    location,
+    hostName,
+    hostEmail,
+    guestName,
+    guestEmail: to,
+    uid: bookingUid,
+  });
+
+  try {
+    await resend.emails.send({
+      from: emailFrom,
+      to,
+      subject,
+      attachments: [
+        {
+          filename: icsAttachment.filename,
+          content: icsAttachment.content,
+        },
+      ],
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: #dbeafe; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
+              <h1 style="color: #1d4ed8; font-size: 24px; margin: 0 0 8px 0;">Meeting Reminder</h1>
+              <p style="color: #666; margin: 0;">${greeting}</p>
+            </div>
+
+            ${bodyText ? `
+            <div style="margin-bottom: 24px;">
+              <p style="color: #333; font-size: 16px; margin: 0;">${bodyText}</p>
+            </div>
+            ` : ""}
+
+            <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
+              <h2 style="color: #1a1a1a; font-size: 18px; margin: 0 0 16px 0;">${eventTitle}</h2>
+
+              <div style="margin-bottom: 12px;">
+                <p style="color: #666; font-size: 14px; margin: 0;">When</p>
+                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">${formattedTime}</p>
+                <p style="color: #666; font-size: 14px; margin: 4px 0 0 0;">${timezone}</p>
+              </div>
+
+              <div style="margin-bottom: 12px;">
+                <p style="color: #666; font-size: 14px; margin: 0;">Who</p>
+                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">${hostName}</p>
+              </div>
+
+              ${location ? `
+              <div style="margin-bottom: 12px;">
+                <p style="color: #666; font-size: 14px; margin: 0;">Where</p>
+                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">
+                  ${location.startsWith("http") ? `<a href="${location}" style="color: #2563eb;">${location}</a>` : location}
+                </p>
+              </div>
+              ` : ""}
+
+              ${calendarLinksHtml}
+            </div>
+
+            <div style="text-align: center;">
+              <a href="${rescheduleUrl}" style="display: inline-block; color: #2563eb; text-decoration: none; margin-right: 16px;">Reschedule</a>
+              <a href="${cancelUrl}" style="display: inline-block; color: #dc2626; text-decoration: none;">Cancel</a>
+            </div>
+
+            ${footerText ? `
+            <p style="color: #999; font-size: 12px; text-align: center; margin-top: 32px;">
+              ${footerText}
+            </p>
+            ` : ""}
+          </body>
+        </html>
+      `,
+    });
+  } catch (error) {
+    console.error("Failed to send reminder email:", error);
     throw error;
   }
 }

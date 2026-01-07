@@ -1,4 +1,4 @@
--- Add payment support to Cal-Lite
+-- Add payment support to QuickQuack
 -- Migration: 00002_add_payments
 
 -- Create payment status enum

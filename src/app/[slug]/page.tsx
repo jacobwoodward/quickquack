@@ -3,9 +3,6 @@ import { notFound } from "next/navigation";
 import { BookingPage } from "@/components/booking/booking-page";
 import type { User, EventType, Schedule, Availability } from "@/lib/types/database";
 
-// Single-user app - this is the default username
-const DEFAULT_USERNAME = "jacobwoodward";
-
 interface BookingPageProps {
   params: Promise<{ slug: string }>;
 }
@@ -18,11 +15,11 @@ export default async function PublicBookingPage({ params }: BookingPageProps) {
   const { slug } = await params;
   const supabase = await createServiceClient();
 
-  // Find user by username (single-user app)
+  // Single-user app: get the first (and only) user
   const { data: userData } = await supabase
     .from("users")
     .select("*")
-    .eq("username", DEFAULT_USERNAME)
+    .limit(1)
     .single();
 
   const user = userData as User | null;

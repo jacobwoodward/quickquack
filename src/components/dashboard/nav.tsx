@@ -16,6 +16,7 @@ import {
   Link2,
   Palette,
   CreditCard,
+  Mail,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -30,6 +31,7 @@ const navigation = [
   { name: "Event Types", href: "/event-types", icon: CalendarDays },
   { name: "Availability", href: "/availability", icon: Clock },
   { name: "Payments", href: "/payments", icon: CreditCard },
+  { name: "Emails", href: "/emails", icon: Mail },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 

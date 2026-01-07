@@ -81,6 +81,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const newEndTimeUtc = addMinutes(newStartTimeUtc, eventLength);
 
     const originalStartTime = new Date(booking.start_time);
+    const originalEndTime = new Date(booking.end_time);
 
     // Update the booking
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -136,8 +137,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           hostName: user?.name || user?.email || "Host",
           eventTitle: booking.event_types?.title || booking.title,
           startTime: originalStartTime,
+          endTime: originalEndTime,
           newStartTime: newStartTimeUtc,
-          endTime: newEndTimeUtc,
+          newEndTime: newEndTimeUtc,
           timezone: attendee.timezone,
           location: bookingRef?.meeting_url || booking.location_value || undefined,
           bookingUid: booking.uid,
