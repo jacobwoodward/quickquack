@@ -8,46 +8,6 @@ interface BookingPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: BookingPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const supabase = await createServiceClient();
-
-  // Get the single user
-  const { data: userData } = await supabase
-    .from("users")
-    .select("*")
-    .limit(1)
-    .single();
-
-  if (!userData) {
-    return { title: { absolute: "Book" } };
-  }
-
-  // Get page settings for the user's configured title
-  const { data: pageSettings } = await supabase
-    .from("page_settings")
-    .select("page_title")
-    .eq("user_id", userData.id)
-    .single();
-
-  // Get event type for the title
-  const { data: eventType } = await supabase
-    .from("event_types")
-    .select("title")
-    .eq("user_id", userData.id)
-    .eq("slug", slug)
-    .single();
-
-  const siteTitle = pageSettings?.page_title || userData.name || "Book";
-  const eventTitle = eventType?.title || "Book";
-
-  return {
-    title: {
-      absolute: `${eventTitle} | ${siteTitle}`,
-    },
-  };
-}
-
 interface ScheduleWithAvailability extends Schedule {
   availability: Availability[];
 }
@@ -65,6 +25,42 @@ async function getSingleUser() {
     .single();
 
   return userData as User | null;
+}
+
+export async function generateMetadata({ params }: BookingPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createServiceClient();
+
+  // Get the single user
+  const user = await getSingleUser();
+
+  if (!user) {
+    return { title: { absolute: "Book" } };
+  }
+
+  // Get page settings for the user's configured title
+  const { data: pageSettings } = await supabase
+    .from("page_settings")
+    .select("page_title")
+    .eq("user_id", user.id)
+    .single();
+
+  // Get event type for the title
+  const { data: eventType } = await supabase
+    .from("event_types")
+    .select("title")
+    .eq("user_id", user.id)
+    .eq("slug", slug)
+    .single();
+
+  const siteTitle = pageSettings?.page_title || user.name || "Book";
+  const eventTitle = eventType?.title || "Book";
+
+  return {
+    title: {
+      absolute: `${eventTitle} | ${siteTitle}`,
+    },
+  };
 }
 
 export default async function PublicBookingPage({ params }: BookingPageProps) {
