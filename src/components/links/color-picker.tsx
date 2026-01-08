@@ -80,7 +80,7 @@ export function ColorPicker({
                   color={color}
                   onChange={onChange}
                   prefixed={false}
-                  className="flex-1 px-2 py-1 text-sm font-mono border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                  className="flex-1 px-2 py-1 text-sm font-mono border border-gray-300 rounded text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
                 />
               </div>
 

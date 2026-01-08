@@ -404,7 +404,7 @@ export function EventTypeForm({ eventType }: EventTypeFormProps) {
                             min="0.50"
                             step="0.01"
                             required={isPaid}
-                            className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
@@ -436,7 +436,7 @@ export function EventTypeForm({ eventType }: EventTypeFormProps) {
                           value={promoCode}
                           onChange={(e) => setPromoCode(e.target.value)}
                           placeholder="FREEMEETING"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                         <p className="text-xs text-gray-500 mt-1">
                           Guests who enter this code can book for free

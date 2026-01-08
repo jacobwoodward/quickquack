@@ -162,7 +162,7 @@ export default async function PaymentsPage() {
                   </li>
                   <li>Copy your Secret key (starts with sk_)</li>
                   <li>
-                    Add it to your <code className="bg-gray-200 px-1 rounded">.env.local</code> file:
+                    Add it to your <code className="bg-gray-200 px-1 rounded text-gray-900">.env.local</code> file:
                     <pre className="mt-2 bg-gray-800 text-gray-100 p-3 rounded text-xs overflow-x-auto">
                       STRIPE_SECRET_KEY=sk_live_...{"\n"}
                       STRIPE_WEBHOOK_SECRET=whsec_...
@@ -170,7 +170,7 @@ export default async function PaymentsPage() {
                   </li>
                   <li>
                     Set up a webhook endpoint in Stripe pointing to:{" "}
-                    <code className="bg-gray-200 px-1 rounded text-xs">
+                    <code className="bg-gray-200 px-1 rounded text-xs text-gray-900">
                       {process.env.NEXT_PUBLIC_APP_URL || "https://yourdomain.com"}/api/stripe/webhook
                     </code>
                   </li>

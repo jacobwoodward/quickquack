@@ -110,7 +110,7 @@ export default function SetupPage() {
                               {status.missingVars.map((v) => (
                                 <code
                                   key={v}
-                                  className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded font-mono"
+                                  className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-900 rounded font-mono"
                                 >
                                   {v}
                                 </code>
@@ -168,7 +168,7 @@ export default function SetupPage() {
                 <li>Create a new project</li>
                 <li>
                   Go to SQL Editor and run the migrations from{" "}
-                  <code className="bg-gray-100 px-1 rounded">
+                  <code className="bg-gray-100 px-1 rounded text-gray-900">
                     supabase/migrations/
                   </code>
                 </li>
@@ -202,7 +202,7 @@ export default function SetupPage() {
                 <li>Create OAuth 2.0 credentials (Web application)</li>
                 <li>
                   Add redirect URI:{" "}
-                  <code className="bg-gray-100 px-1 rounded">
+                  <code className="bg-gray-100 px-1 rounded text-gray-900">
                     https://YOUR_PROJECT.supabase.co/auth/v1/callback
                   </code>
                 </li>
@@ -223,7 +223,7 @@ export default function SetupPage() {
               </h4>
               <p className="mt-2 ml-8 text-sm text-gray-600">
                 Add these to your Vercel project settings or{" "}
-                <code className="bg-gray-100 px-1 rounded">.env.local</code>{" "}
+                <code className="bg-gray-100 px-1 rounded text-gray-900">.env.local</code>{" "}
                 file:
               </p>
               <pre className="mt-2 ml-8 text-xs bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">

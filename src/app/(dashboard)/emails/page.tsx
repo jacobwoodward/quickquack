@@ -116,7 +116,7 @@ export default async function EmailsPage() {
             <p className="text-sm text-gray-600">
               To enable email notifications, add your Resend API key to your environment variables:
             </p>
-            <div className="mt-2 p-3 bg-gray-100 rounded-lg font-mono text-sm">
+            <div className="mt-2 p-3 bg-gray-100 rounded-lg font-mono text-sm text-gray-900">
               RESEND_API_KEY=re_...
               <br />
               EMAIL_FROM=&quot;Your Name &lt;noreply@yourdomain.com&gt;&quot;
@@ -133,9 +133,9 @@ export default async function EmailsPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            <code className="px-2 py-1 bg-gray-100 rounded text-sm">{"{{guestName}}"}</code>
-            <code className="px-2 py-1 bg-gray-100 rounded text-sm">{"{{hostName}}"}</code>
-            <code className="px-2 py-1 bg-gray-100 rounded text-sm">{"{{eventTitle}}"}</code>
+            <code className="px-2 py-1 bg-gray-100 rounded text-sm text-gray-900">{"{{guestName}}"}</code>
+            <code className="px-2 py-1 bg-gray-100 rounded text-sm text-gray-900">{"{{hostName}}"}</code>
+            <code className="px-2 py-1 bg-gray-100 rounded text-sm text-gray-900">{"{{eventTitle}}"}</code>
           </div>
         </CardContent>
       </Card>
