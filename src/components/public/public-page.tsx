@@ -214,7 +214,7 @@ export function PublicPage({
               {user.avatar_url ? (
                 <img
                   src={user.avatar_url}
-                  alt={displayName}
+                  alt={displayName ?? ''}
                   className="w-24 h-24 rounded-full mx-auto object-cover border-4 border-white/20 shadow-lg"
                 />
               ) : (
@@ -225,7 +225,7 @@ export function PublicPage({
                     color: buttonTextColor,
                   }}
                 >
-                  {displayName.charAt(0).toUpperCase()}
+                  {(displayName ?? '?').charAt(0).toUpperCase()}
                 </div>
               )}
             </div>
