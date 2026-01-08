@@ -350,11 +350,11 @@ export function BookingPage({ user, eventType, schedule }: BookingPageProps) {
                           new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
                         )
                       }
-                      className="p-2 hover:bg-gray-100 rounded-lg"
+                      className="p-2 hover:bg-gray-100 rounded-lg text-gray-900"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
-                    <span className="font-medium">
+                    <span className="font-medium text-gray-900">
                       {format(currentMonth, "MMMM yyyy")}
                     </span>
                     <button
@@ -363,7 +363,7 @@ export function BookingPage({ user, eventType, schedule }: BookingPageProps) {
                           new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
                         )
                       }
-                      className="p-2 hover:bg-gray-100 rounded-lg"
+                      className="p-2 hover:bg-gray-100 rounded-lg text-gray-900"
                     >
                       <ChevronRight className="w-5 h-5" />
                     </button>
