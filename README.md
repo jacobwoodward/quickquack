@@ -42,6 +42,10 @@ You'll need accounts on these free services:
    cd quickquack
    npm install
    ```
+3. Copy the environment template:
+   ```bash
+   cp .env.example .env.local
+   ```
 
 ### Step 2: Set Up Supabase (Database)
 
@@ -226,8 +230,8 @@ To get the latest features:
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/quickquack/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/quickquack/discussions)
+- **Issues**: [GitHub Issues](https://github.com/jacobwoodward/jacobwoodward-dev/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/jacobwoodward/jacobwoodward-dev/discussions)
 
 ---
 
