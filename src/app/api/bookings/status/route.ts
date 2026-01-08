@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 
+interface PaymentWithBooking {
+  id: string;
+  status: string;
+  booking_id: string | null;
+  bookings: {
+    id: string;
+    uid: string;
+    title: string;
+    start_time: string;
+    end_time: string;
+    location_value: string | null;
+    event_types: { title: string } | null;
+  } | null;
+}
+
 /**
  * Check booking status by Stripe checkout session ID
  * Used by the success page to verify a booking was actually created
@@ -18,7 +33,7 @@ export async function GET(request: NextRequest) {
   const supabase = await createServiceClient();
 
   // Find the payment record for this checkout session
-  const { data: payment, error: paymentError } = await supabase
+  const { data, error: paymentError } = await supabase
     .from("payments")
     .select(`
       id,
@@ -37,6 +52,8 @@ export async function GET(request: NextRequest) {
     .eq("stripe_checkout_session_id", sessionId)
     .single();
 
+  const payment = data as PaymentWithBooking | null;
+
   if (paymentError || !payment) {
     return NextResponse.json({
       status: "not_found",
@@ -46,15 +63,7 @@ export async function GET(request: NextRequest) {
 
   // Check if booking was created
   if (payment.status === "completed" && payment.booking_id) {
-    const booking = (payment as { bookings: unknown }).bookings as {
-      id: string;
-      uid: string;
-      title: string;
-      start_time: string;
-      end_time: string;
-      location_value: string | null;
-      event_types: { title: string } | null;
-    } | null;
+    const booking = payment.bookings;
 
     return NextResponse.json({
       status: "confirmed",
