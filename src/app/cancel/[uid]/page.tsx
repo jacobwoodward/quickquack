@@ -11,12 +11,17 @@ interface CancelPageProps {
   params: Promise<{ uid: string }>;
 }
 
+interface BookingMetadata {
+  event_types: { title: string } | null;
+  users: { id: string; name: string | null } | null;
+}
+
 export async function generateMetadata({ params }: CancelPageProps): Promise<Metadata> {
   const { uid } = await params;
   const supabase = await createServiceClient();
 
   // Get booking with user info
-  const { data: booking } = await supabase
+  const { data: bookingRaw } = await supabase
     .from("bookings")
     .select(`
       event_types (title),
@@ -25,19 +30,23 @@ export async function generateMetadata({ params }: CancelPageProps): Promise<Met
     .eq("uid", uid)
     .single();
 
+  const booking = bookingRaw as BookingMetadata | null;
+
   if (!booking?.users) {
     return { title: { absolute: "Cancel Booking" } };
   }
 
   // Get page settings for the user's configured title
-  const { data: pageSettings } = await supabase
+  const { data: pageSettingsData } = await supabase
     .from("page_settings")
     .select("page_title")
-    .eq("user_id", (booking.users as { id: string }).id)
+    .eq("user_id", booking.users.id)
     .single();
 
-  const siteTitle = pageSettings?.page_title || (booking.users as { name: string | null }).name || "Cancel";
-  const eventTitle = (booking.event_types as { title: string } | null)?.title || "Meeting";
+  const pageSettings = pageSettingsData as { page_title: string | null } | null;
+
+  const siteTitle = pageSettings?.page_title || booking.users.name || "Cancel";
+  const eventTitle = booking.event_types?.title || "Meeting";
 
   return {
     title: {
