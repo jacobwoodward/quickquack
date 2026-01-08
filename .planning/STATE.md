@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-08)
 
 **Core value:** The app must work end-to-end: login, create event types, share links, accept bookings.
-**Current focus:** Phase 1 — Auth Bug Fixes
+**Current focus:** Phase 2 — Architecture Review
 
 ## Current Position
 
-Phase: 1 of 5 (Auth Bug Fixes)
-Plan: 2 of 2 (01-02: Fix post-login navigation)
-Status: Ready to execute
-Last activity: 2026-01-08 — Plan 01-01 completed
+Phase: 2 of 5 (Architecture Review)
+Plan: 1 of 3 (02-01: Review component patterns)
+Status: Ready to plan
+Last activity: 2026-01-08 — Phase 1 completed
 
-Progress: █░░░░░░░░░ 10%
+Progress: ██░░░░░░░░ 20%
 
 ## Performance Metrics
 

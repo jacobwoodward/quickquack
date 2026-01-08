@@ -14,7 +14,7 @@ None
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Auth Bug Fixes** - Fix production auth redirect and post-login navigation
+- [x] **Phase 1: Auth Bug Fixes** - Fix production auth redirect and post-login navigation
 - [ ] **Phase 2: Architecture Review** - Code quality audit and pattern consistency
 - [ ] **Phase 3: Security Audit** - OWASP compliance and vulnerability assessment
 - [ ] **Phase 4: Documentation** - README, self-hosting guide, and contributor docs
@@ -30,7 +30,7 @@ None
 
 Plans:
 - [x] 01-01: Fix localhost redirect after OAuth (use getAppUrl() in callback)
-- [ ] 01-02: Fix post-login navigation to dashboard (middleware redirect from / to /dashboard)
+- [x] 01-02: Fix post-login navigation to dashboard (middleware redirect from / to /dashboard)
 
 ### Phase 2: Architecture Review
 **Goal**: Audit codebase for quality, consistency, and maintainability
@@ -84,7 +84,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Auth Bug Fixes | 1/2 | In progress | - |
+| 1. Auth Bug Fixes | 2/2 | Complete | 2026-01-08 |
 | 2. Architecture Review | 0/3 | Not started | - |
 | 3. Security Audit | 0/4 | Not started | - |
 | 4. Documentation | 0/3 | Not started | - |
