@@ -210,7 +210,7 @@ export function ReschedulePage({
             <div className="md:w-2/3 p-6">
               {step === "date" && (
                 <div>
-                  <h2 className="text-lg font-semibold mb-4">Select a New Date</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Select a New Date</h2>
 
                   <div className="flex items-center justify-between mb-4">
                     <button
@@ -283,7 +283,7 @@ export function ReschedulePage({
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
-                    <h2 className="text-lg font-semibold">
+                    <h2 className="text-lg font-semibold text-gray-900">
                       {format(selectedDate, "EEEE, MMMM d")}
                     </h2>
                   </div>

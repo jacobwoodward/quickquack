@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Clock, Globe, ChevronLeft, ChevronRight, Check, Video, MapPin, Phone, Link as LinkIcon, DollarSign, Tag } from "lucide-react";
+import { Clock, Globe, ChevronLeft, ChevronRight, Check, Video, MapPin, Phone, Link as LinkIcon, CreditCard, Tag } from "lucide-react";
 import type { User, EventType, Schedule, Availability } from "@/lib/types/database";
 
 // Extended EventType with payment fields - using Omit to override the types
@@ -313,10 +313,8 @@ export function BookingPage({ user, eventType, schedule }: BookingPageProps) {
                   </div>
                   {isPaidEvent && eventType.price_cents && (
                     <div className="flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-green-600" />
-                      <span className="font-medium text-green-600">
-                        {formatPrice(eventType.price_cents)}
-                      </span>
+                      <CreditCard className="w-4 h-4" />
+                      <span>{formatPrice(eventType.price_cents)}</span>
                     </div>
                   )}
                 </div>
@@ -342,7 +340,7 @@ export function BookingPage({ user, eventType, schedule }: BookingPageProps) {
             <div className="md:w-2/3 p-6">
               {step === "date" && (
                 <div>
-                  <h2 className="text-lg font-semibold mb-4">Select a Date</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Select a Date</h2>
 
                   {/* Calendar header */}
                   <div className="flex items-center justify-between mb-4">
@@ -419,7 +417,7 @@ export function BookingPage({ user, eventType, schedule }: BookingPageProps) {
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
-                      <h2 className="text-lg font-semibold">
+                      <h2 className="text-lg font-semibold text-gray-900">
                         {format(selectedDate, "EEEE, MMMM d")}
                       </h2>
                     </div>
@@ -495,7 +493,7 @@ export function BookingPage({ user, eventType, schedule }: BookingPageProps) {
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
-                    <h2 className="text-lg font-semibold">Enter your details</h2>
+                    <h2 className="text-lg font-semibold text-gray-900">Enter your details</h2>
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-4">
