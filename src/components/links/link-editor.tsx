@@ -79,6 +79,43 @@ export function LinkEditor({
 
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  // Sync form state when link prop changes (for edit mode)
+  // This is an intentional pattern for syncing props to form state
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (link) {
+      setLinkType(link.link_type);
+      setTitle(link.title);
+      setDescription(link.description || "");
+      setUrl(link.url || "");
+      setEventTypeId(link.event_type_id || "");
+      setDisplayStyle(link.display_style);
+      setIconType(link.icon_type);
+      setIconValue(link.icon_value || "");
+      setThumbnailUrl(link.thumbnail_url || "");
+      setBackgroundColor(link.background_color || "");
+      setTextColor(link.text_color || "");
+      setIsVisible(link.is_visible);
+      setIsFeatured(link.is_featured);
+    } else {
+      // Reset to defaults for new link
+      setLinkType("url");
+      setTitle("");
+      setDescription("");
+      setUrl("");
+      setEventTypeId("");
+      setDisplayStyle("standard");
+      setIconType("lucide");
+      setIconValue("");
+      setThumbnailUrl("");
+      setBackgroundColor("");
+      setTextColor("");
+      setIsVisible(true);
+      setIsFeatured(false);
+    }
+  }, [link]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
   // Update URL format based on link type
   useEffect(() => {
     if (linkType === "email" && url && !url.startsWith("mailto:")) {
