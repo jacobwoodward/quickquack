@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { LinksManager } from "@/components/links/links-manager";
 import type { User, EventType, PageSettings, LinkWithEventType } from "@/lib/types/database";
@@ -93,9 +94,9 @@ export default async function LinksPage() {
         <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-sm text-yellow-800">
             You need to set a username in{" "}
-            <a href="/settings" className="font-medium underline">
+            <Link href="/settings" className="font-medium underline">
               Settings
-            </a>{" "}
+            </Link>{" "}
             before your public page is accessible.
           </p>
         </div>

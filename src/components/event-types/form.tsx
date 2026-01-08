@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -359,9 +360,9 @@ export function EventTypeForm({ eventType }: EventTypeFormProps) {
                     <p className="text-sm text-amber-700 mt-1">
                       To accept payments, add your Stripe API keys to your environment
                       variables. Visit the{" "}
-                      <a href="/payments" className="underline font-medium">
+                      <Link href="/payments" className="underline font-medium">
                         Payments page
-                      </a>{" "}
+                      </Link>{" "}
                       for setup instructions.
                     </p>
                   </div>

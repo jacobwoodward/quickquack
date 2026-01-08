@@ -89,8 +89,8 @@ export function CalendarSettings({
     }
 
     const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (credentialId) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (supabase as any).from("credentials").delete().eq("id", credentialId);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

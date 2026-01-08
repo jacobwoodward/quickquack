@@ -12,18 +12,17 @@ function BookingSuccessContent() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (!sessionId) {
-      setStatus("error");
-      setMessage("No session ID provided");
-      return;
-    }
-
     // The webhook handles booking creation, so we just show success
     // In a production app, you might want to poll for the booking status
     const timer = setTimeout(() => {
-      setStatus("success");
-      setMessage("Your booking has been confirmed!");
-    }, 1500);
+      if (!sessionId) {
+        setStatus("error");
+        setMessage("No session ID provided");
+      } else {
+        setStatus("success");
+        setMessage("Your booking has been confirmed!");
+      }
+    }, sessionId ? 1500 : 0);
 
     return () => clearTimeout(timer);
   }, [sessionId]);

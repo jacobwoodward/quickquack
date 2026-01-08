@@ -28,7 +28,7 @@ export default async function AppearancePage() {
 
   // Get page settings (will be created automatically if doesn't exist via trigger)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let { data: pageSettingsData } = await (supabase as any)
+  const { data: pageSettingsData } = await (supabase as any)
     .from("page_settings")
     .select("*")
     .eq("user_id", user.id)
