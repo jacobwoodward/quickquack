@@ -209,8 +209,8 @@ export function DraggableItemCard({
   isVisible = true,
   className = "",
 }: DraggableItemCardProps) {
-  // Extract className from dragHandleProps to merge with our styles
-  const { className: dragClassName, ...restDragProps } = dragHandleProps as { className?: string; [key: string]: unknown };
+  // Extract className from dragHandleProps since we apply our own styles
+  const { className: _dragClassName, ...restDragProps } = dragHandleProps as { className?: string; [key: string]: unknown };
 
   return (
     <motion.div
@@ -220,14 +220,15 @@ export function DraggableItemCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
     >
-      <div className="flex items-stretch">
+      <div className="flex items-center">
         {/* Drag handle */}
-        <div
-          className={`flex items-center justify-center px-3 border-r border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors ${dragClassName || ""}`}
+        <button
+          type="button"
+          className={`flex items-center justify-center px-3 py-4 border-r border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors cursor-grab active:cursor-grabbing touch-none`}
           {...restDragProps}
         >
           <GripIcon />
-        </div>
+        </button>
 
         {/* Content */}
         <div className={`flex-1 p-4 ${!isVisible ? "opacity-50" : ""}`}>
