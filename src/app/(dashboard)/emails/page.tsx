@@ -7,7 +7,7 @@ import { Mail, Check, X } from "lucide-react";
 interface EmailTemplate {
   id: string;
   user_id: string;
-  template_type: "confirmation" | "reminder" | "cancellation" | "rescheduled";
+  template_type: "confirmation" | "reminder" | "cancellation" | "rescheduled" | "host_notification";
   subject: string;
   greeting: string | null;
   body_text: string | null;
@@ -38,13 +38,27 @@ const defaultTemplates: Record<string, { subject: string; greeting: string; body
     greeting: "Your meeting has been moved to a new time.",
     body_text: "",
   },
+  host_notification: {
+    subject: "New Booking: {{eventTitle}} with {{guestName}}",
+    greeting: "You have a new booking!",
+    body_text: "",
+  },
 };
 
 const templateDescriptions: Record<string, string> = {
-  confirmation: "Sent immediately after a booking is confirmed",
-  reminder: "Sent 1 hour before the meeting starts",
-  cancellation: "Sent when a meeting is cancelled",
-  rescheduled: "Sent when a meeting is rescheduled to a new time",
+  confirmation: "Sent to guest immediately after a booking is confirmed",
+  reminder: "Sent to guest 1 hour before the meeting starts",
+  cancellation: "Sent to guest when a meeting is cancelled",
+  rescheduled: "Sent to guest when a meeting is rescheduled to a new time",
+  host_notification: "Sent to you when someone books a meeting",
+};
+
+const templateDisplayNames: Record<string, string> = {
+  confirmation: "Confirmation",
+  reminder: "Reminder",
+  cancellation: "Cancellation",
+  rescheduled: "Rescheduled",
+  host_notification: "New Booking Notification",
 };
 
 export default async function EmailsPage() {
@@ -69,7 +83,8 @@ export default async function EmailsPage() {
   const templateMap = new Map<string, EmailTemplate>();
   emailTemplates?.forEach((t) => templateMap.set(t.template_type, t));
 
-  const templateTypes: Array<"confirmation" | "reminder" | "cancellation" | "rescheduled"> = [
+  const templateTypes: Array<"confirmation" | "reminder" | "cancellation" | "rescheduled" | "host_notification"> = [
+    "host_notification",
     "confirmation",
     "reminder",
     "cancellation",
@@ -151,7 +166,7 @@ export default async function EmailsPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-lg capitalize">{type} Email</CardTitle>
+                    <CardTitle className="text-lg">{templateDisplayNames[type]} Email</CardTitle>
                     <CardDescription>{templateDescriptions[type]}</CardDescription>
                   </div>
                   {existing ? (

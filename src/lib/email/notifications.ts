@@ -702,3 +702,148 @@ export async function sendBookingReminder(
     throw error;
   }
 }
+
+interface HostNotificationParams {
+  to: string;
+  hostName: string;
+  guestName: string;
+  guestEmail: string;
+  eventTitle: string;
+  startTime: Date;
+  endTime: Date;
+  timezone: string;
+  location?: string;
+  notes?: string;
+  priceCents?: number;
+}
+
+/**
+ * Send notification to host when a new booking is made
+ */
+export async function sendHostNotification(
+  params: HostNotificationParams,
+  template?: EmailTemplate
+) {
+  if (!resend) {
+    console.log("Resend not configured, skipping host notification");
+    return;
+  }
+
+  // Check if template is disabled
+  if (template && template.is_enabled === false) {
+    console.log("Host notification email template is disabled, skipping");
+    return;
+  }
+
+  const {
+    to,
+    hostName,
+    guestName,
+    guestEmail,
+    eventTitle,
+    startTime,
+    endTime,
+    timezone,
+    location,
+    notes,
+    priceCents,
+  } = params;
+
+  const formattedTime = formatTimeInTimezone(startTime, timezone);
+  const duration = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
+  const emailFrom = process.env.EMAIL_FROM || "QuickQuack <noreply@example.com>";
+  const isPaid = priceCents && priceCents > 0;
+
+  // Use template values if provided
+  const subject = template?.subject
+    ? template.subject
+        .replace("{{eventTitle}}", eventTitle)
+        .replace("{{hostName}}", hostName)
+        .replace("{{guestName}}", guestName)
+    : `New Booking: ${eventTitle} with ${guestName}`;
+
+  const greeting = template?.greeting
+    ? template.greeting.replace("{{guestName}}", guestName)
+    : `You have a new booking!`;
+
+  const footerText = template?.footer_text || "";
+
+  try {
+    await resend.emails.send({
+      from: emailFrom,
+      to,
+      subject,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: #ecfdf5; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
+              <h1 style="color: #059669; font-size: 24px; margin: 0 0 8px 0;">New Booking</h1>
+              <p style="color: #666; margin: 0;">${greeting}</p>
+            </div>
+
+            <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
+              <h2 style="color: #1a1a1a; font-size: 18px; margin: 0 0 16px 0;">${eventTitle}</h2>
+
+              <div style="margin-bottom: 12px;">
+                <p style="color: #666; font-size: 14px; margin: 0;">Guest</p>
+                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">${guestName}</p>
+                <p style="color: #666; font-size: 14px; margin: 4px 0 0 0;">
+                  <a href="mailto:${guestEmail}" style="color: #2563eb;">${guestEmail}</a>
+                </p>
+              </div>
+
+              <div style="margin-bottom: 12px;">
+                <p style="color: #666; font-size: 14px; margin: 0;">When</p>
+                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">${formattedTime}</p>
+                <p style="color: #666; font-size: 14px; margin: 4px 0 0 0;">${timezone} (${duration} minutes)</p>
+              </div>
+
+              ${location ? `
+              <div style="margin-bottom: 12px;">
+                <p style="color: #666; font-size: 14px; margin: 0;">Where</p>
+                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">
+                  ${location.startsWith("http") ? `<a href="${location}" style="color: #2563eb;">${location}</a>` : location}
+                </p>
+              </div>
+              ` : ""}
+
+              ${notes ? `
+              <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                <p style="color: #666; font-size: 14px; margin: 0;">Message from guest</p>
+                <div style="background: #f9fafb; border-radius: 6px; padding: 12px; margin-top: 8px;">
+                  <p style="color: #1a1a1a; font-size: 14px; margin: 0; white-space: pre-wrap;">${notes}</p>
+                </div>
+              </div>
+              ` : ""}
+
+              ${isPaid ? `
+              <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                <p style="color: #666; font-size: 14px; margin: 0;">Payment</p>
+                <p style="color: #16a34a; font-size: 16px; margin: 4px 0 0 0; font-weight: 600;">${formatPrice(priceCents)} received</p>
+              </div>
+              ` : ""}
+            </div>
+
+            <p style="color: #666; font-size: 14px; text-align: center;">
+              This meeting has been added to your calendar.
+            </p>
+
+            ${footerText ? `
+            <p style="color: #999; font-size: 12px; text-align: center; margin-top: 32px;">
+              ${footerText}
+            </p>
+            ` : ""}
+          </body>
+        </html>
+      `,
+    });
+  } catch (error) {
+    console.error("Failed to send host notification email:", error);
+    throw error;
+  }
+}

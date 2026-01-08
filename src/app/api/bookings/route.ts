@@ -3,7 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { getGoogleCalendarService } from "@/lib/google/calendar";
 import { parseISO, setHours, setMinutes, addMinutes } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
-import { sendBookingConfirmation } from "@/lib/email/notifications";
+import { sendBookingConfirmation, sendHostNotification } from "@/lib/email/notifications";
 import { parseTimeString } from "@/lib/utils/date";
 import type { EventType, User, Booking } from "@/lib/types/database";
 
@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
       // Continue without calendar event
     }
 
-    // Send confirmation email
+    // Send confirmation email to guest
     try {
       await sendBookingConfirmation({
         to: email,
@@ -177,6 +177,25 @@ export async function POST(request: NextRequest) {
       });
     } catch (error) {
       console.error("Failed to send confirmation email:", error);
+      // Continue without email
+    }
+
+    // Send notification email to host
+    try {
+      await sendHostNotification({
+        to: user.email,
+        hostName: user.name || user.email,
+        guestName: name,
+        guestEmail: email,
+        eventTitle: eventType.title,
+        startTime: startTimeUtc,
+        endTime: endTimeUtc,
+        timezone,
+        location: meetingUrl || eventType.location_value || undefined,
+        notes: notes || undefined,
+      });
+    } catch (error) {
+      console.error("Failed to send host notification:", error);
       // Continue without email
     }
 

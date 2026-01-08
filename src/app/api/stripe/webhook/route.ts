@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import { getStripeClient, getWebhookSecret } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getGoogleCalendarService } from "@/lib/google/calendar";
-import { sendBookingConfirmation } from "@/lib/email/notifications";
+import { sendBookingConfirmation, sendHostNotification } from "@/lib/email/notifications";
 import { parseISO, setHours, setMinutes, addMinutes } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
 import { parseTimeString } from "@/lib/utils/date";
@@ -195,7 +195,7 @@ async function createBookingFromPayment(
     console.error("Failed to create calendar event:", error);
   }
 
-  // Send confirmation email
+  // Send confirmation email to guest
   try {
     await sendBookingConfirmation({
       to: guest_email,
@@ -207,9 +207,29 @@ async function createBookingFromPayment(
       timezone: guest_timezone,
       location: meetingUrl || eventType.location_value || undefined,
       bookingUid: booking.uid,
+      priceCents: session.amount_total || undefined,
     });
   } catch (error) {
     console.error("Failed to send confirmation email:", error);
+  }
+
+  // Send notification email to host
+  try {
+    await sendHostNotification({
+      to: user.email,
+      hostName: user.name || user.email,
+      guestName: guest_name,
+      guestEmail: guest_email,
+      eventTitle: eventType.title,
+      startTime: startTimeUtc,
+      endTime: endTimeUtc,
+      timezone: guest_timezone,
+      location: meetingUrl || eventType.location_value || undefined,
+      notes: booking_notes || undefined,
+      priceCents: session.amount_total || undefined,
+    });
+  } catch (error) {
+    console.error("Failed to send host notification:", error);
   }
 }
 
