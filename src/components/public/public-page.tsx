@@ -139,8 +139,8 @@ export function PublicPage({
   const iconOnlyLinks = visibleLinks.filter((l) => l.display_style === "icon_only");
   const regularLinks = visibleLinks.filter((l) => l.display_style !== "icon_only");
 
-  // Display info
-  const displayName = user.name || user.username || "User";
+  // Display info - use page_title from settings first, then fall back to user's name
+  const displayName = settings.page_title || user.name || user.username;
   const profileUsername = user.username || user.id;
 
   // Base URL for event links (defaults to /book/{username})

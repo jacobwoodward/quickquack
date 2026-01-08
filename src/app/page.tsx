@@ -38,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const pageSettings = pageSettingsData as { page_title: string | null; bio: string | null } | null;
 
-  const title = pageSettings?.page_title || user.name || "QuickQuack";
+  const title = pageSettings?.page_title || user.name || user.email;
   const description = pageSettings?.bio || `Book time with ${user.name || "me"}`;
 
   return {
