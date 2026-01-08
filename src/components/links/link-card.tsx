@@ -176,7 +176,8 @@ function StandardLink({ link, buttonStyle = "rounded", defaultButtonColor, defau
 }
 
 // Featured card with image
-function FeaturedLink({ link, buttonStyle = "rounded", defaultButtonColor, defaultTextColor, onClick, isPreview, href, isInternal }: LinkCardProps) {
+// Note: Featured cards always use rounded-lg, never pill style (looks bad with images)
+function FeaturedLink({ link, defaultButtonColor, defaultTextColor, onClick, isPreview, href, isInternal }: LinkCardProps) {
   const bgColor = link.background_color || defaultButtonColor || "#ffffff";
   const textColor = link.text_color || defaultTextColor || "#000000";
   const resolvedHref = href || link.url || "#";
@@ -184,7 +185,7 @@ function FeaturedLink({ link, buttonStyle = "rounded", defaultButtonColor, defau
   const content = (
     <>
       {link.thumbnail_url && (
-        <div className="w-full h-40 overflow-hidden">
+        <div className="w-full aspect-video overflow-hidden">
           <img
             src={link.thumbnail_url}
             alt=""
@@ -209,7 +210,8 @@ function FeaturedLink({ link, buttonStyle = "rounded", defaultButtonColor, defau
     </>
   );
 
-  const className = `w-full flex flex-col overflow-hidden ${buttonStyles[buttonStyle]} transition-all hover:scale-[1.02] active:scale-[0.98]`;
+  // Always use rounded-lg for featured cards - pill/square styles look bad with images
+  const className = `w-full flex flex-col overflow-hidden rounded-lg transition-all hover:scale-[1.02] active:scale-[0.98]`;
   const style = { backgroundColor: bgColor, color: textColor };
 
   if (isPreview) {
