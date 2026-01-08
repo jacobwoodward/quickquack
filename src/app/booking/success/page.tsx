@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle, Loader2, XCircle, Calendar, Clock, Video, AlertTriangle } from "lucide-react";
+import { CheckCircle, Loader2, XCircle, Calendar, Clock, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
 
@@ -191,20 +191,6 @@ function BookingSuccessContent() {
                   {endTime && ` - ${format(endTime, "h:mm a")}`}
                 </span>
               </div>
-
-              {booking.location && (
-                <div className="flex items-center gap-3 text-sm">
-                  <Video className="h-4 w-4 text-gray-400" />
-                  <a
-                    href={booking.location}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                  >
-                    Join Google Meet
-                  </a>
-                </div>
-              )}
             </div>
           )}
 
