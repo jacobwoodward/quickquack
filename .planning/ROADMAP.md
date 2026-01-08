@@ -25,13 +25,12 @@ None
 ### Phase 1: Auth Bug Fixes
 **Goal**: Fix the two blocking auth bugs so users can log in and access the dashboard
 **Depends on**: Nothing (first phase)
-**Research**: Likely (external service configuration)
-**Research topics**: Supabase auth redirect URLs, OAuth callback handling, Next.js middleware auth patterns
-**Plans**: TBD
+**Research**: Completed (inline during planning)
+**Plans**: 2 plans (4 tasks total)
 
 Plans:
-- [ ] 01-01: Investigate and fix localhost redirect after OAuth
-- [ ] 01-02: Fix post-login navigation to dashboard
+- [ ] 01-01: Fix localhost redirect after OAuth (use getAppUrl() in callback)
+- [ ] 01-02: Fix post-login navigation to dashboard (middleware redirect from / to /dashboard)
 
 ### Phase 2: Architecture Review
 **Goal**: Audit codebase for quality, consistency, and maintainability
