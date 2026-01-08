@@ -390,7 +390,7 @@ export function SocialLinksSettings({ userId, initialProfiles }: SocialLinksSett
               <button
                 key={platform}
                 onClick={() => handleQuickAdd(platform)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-colors text-gray-900"
               >
                 <SocialIcon platform={platform} colored />
                 <span className="text-sm font-medium">{platformNames[platform]}</span>

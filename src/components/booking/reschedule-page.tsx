@@ -310,7 +310,7 @@ export function ReschedulePage({
                               ${
                                 selectedTime === time
                                   ? "bg-blue-600 text-white border-blue-600"
-                                  : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+                                  : "border-gray-300 text-gray-900 hover:border-blue-500 hover:bg-blue-50"
                               }
                             `}
                           >
