@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // Security headers for all routes
         source: "/:path*",
         headers: [
           {
@@ -26,6 +27,16 @@ const nextConfig: NextConfig = {
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
+      {
+        // Force revalidation for HTML pages (not static assets)
+        source: "/((?!_next/static|_next/image|favicon.ico).*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
           },
         ],
       },
