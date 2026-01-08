@@ -303,6 +303,7 @@ export function LinksManager({
               <Card>
                 <CardContent className="pt-6">
                   <LinkEditor
+                    key={editingLink?.id || "new"}
                     link={editingLink || undefined}
                     userId={userId}
                     eventTypes={eventTypes}

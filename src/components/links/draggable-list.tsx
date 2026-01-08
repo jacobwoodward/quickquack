@@ -209,6 +209,9 @@ export function DraggableItemCard({
   isVisible = true,
   className = "",
 }: DraggableItemCardProps) {
+  // Extract className from dragHandleProps to merge with our styles
+  const { className: dragClassName, ...restDragProps } = dragHandleProps as { className?: string; [key: string]: unknown };
+
   return (
     <motion.div
       className={`bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden ${className}`}
@@ -220,8 +223,8 @@ export function DraggableItemCard({
       <div className="flex items-stretch">
         {/* Drag handle */}
         <div
-          className="flex items-center justify-center px-3 border-r border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors"
-          {...dragHandleProps}
+          className={`flex items-center justify-center px-3 border-r border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors ${dragClassName || ""}`}
+          {...restDragProps}
         >
           <GripIcon />
         </div>
