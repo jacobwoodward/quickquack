@@ -24,6 +24,8 @@ interface LinksManagerProps {
   eventTypes: EventType[];
   pageSettings: PageSettings | null;
   username: string | null;
+  displayName: string | null;
+  avatarUrl: string | null;
 }
 
 export function LinksManager({
@@ -32,6 +34,8 @@ export function LinksManager({
   eventTypes,
   pageSettings,
   username,
+  displayName,
+  avatarUrl,
 }: LinksManagerProps) {
   const router = useRouter();
   const [links, setLinks] = useState<LinkWithEventType[]>(initialLinks);
@@ -409,7 +413,7 @@ export function LinksManager({
           <Card className="overflow-hidden">
             <LivePreview
               settings={previewSettings}
-              user={{ name: username || "Your Name", avatarUrl: null }}
+              user={{ name: displayName || username || "Your Name", avatarUrl: avatarUrl }}
               bio={pageSettings?.bio}
               links={linksWithEventTypes.filter((l) => l.is_visible)}
               className="rounded-lg"

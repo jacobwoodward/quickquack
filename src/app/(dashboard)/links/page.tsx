@@ -108,6 +108,8 @@ export default async function LinksPage() {
         eventTypes={eventTypes || []}
         pageSettings={pageSettings}
         username={profile.username}
+        displayName={profile.name}
+        avatarUrl={profile.avatar_url}
       />
     </div>
   );

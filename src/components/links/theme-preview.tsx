@@ -326,7 +326,7 @@ export function LivePreview({
 
   return (
     <div
-      className={`w-full min-h-[400px] p-6 flex flex-col items-center ${className}`}
+      className={`w-full aspect-[9/16] max-h-[600px] p-6 flex flex-col items-center overflow-y-auto ${className}`}
       style={{
         ...getBackgroundStyle(),
         color: settings.textColor || themeConfig.textColor,
@@ -335,7 +335,7 @@ export function LivePreview({
     >
       {/* Avatar */}
       {settings.showAvatar && (
-        <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-300 mb-4">
+        <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-300 mb-4 flex-shrink-0">
           {user.avatarUrl ? (
             <img
               src={user.avatarUrl}
@@ -351,16 +351,16 @@ export function LivePreview({
       )}
 
       {/* Name */}
-      <h2 className="text-xl font-bold mb-1">{user.name || "Your Name"}</h2>
+      <h2 className="text-xl font-bold mb-1 flex-shrink-0">{user.name || "Your Name"}</h2>
 
       {/* Bio */}
       {settings.showBio && bio && (
-        <p className="text-sm opacity-70 text-center mb-4 max-w-xs">{bio}</p>
+        <p className="text-sm opacity-70 text-center mb-4 max-w-xs flex-shrink-0">{bio}</p>
       )}
 
       {/* Social Icons */}
       {settings.showSocialIcons && socialProfiles.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6 flex-shrink-0">
           <SocialIconsRow
             profiles={socialProfiles}
             size="sm"
@@ -369,10 +369,10 @@ export function LivePreview({
         </div>
       )}
 
-      {/* Links preview */}
-      <div className="w-full max-w-xs space-y-3">
+      {/* Links preview - show ALL links */}
+      <div className="w-full max-w-xs space-y-3 flex-shrink-0">
         {links.length > 0 ? (
-          links.slice(0, 3).map((link) => (
+          links.map((link) => (
             <div
               key={link.id}
               className={`w-full py-3 px-4 text-center text-sm font-medium ${buttonClasses[buttonStyle]}`}
