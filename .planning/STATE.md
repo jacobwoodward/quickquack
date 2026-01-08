@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-08)
 
 **Core value:** The app must work end-to-end: login, create event types, share links, accept bookings.
-**Current focus:** Phase 3 — Security Audit
+**Current focus:** Phase 4 — Documentation
 
 ## Current Position
 
-Phase: 3 of 5 (Security Audit)
-Plan: 4 of 4 (03-04: Fix identified vulnerabilities)
-Status: Ready to execute
-Last activity: 2026-01-08 — Security reviews 03-01 to 03-03 completed
+Phase: 4 of 5 (Documentation)
+Plan: 1 of 3 (04-01: Write comprehensive README)
+Status: Ready to plan
+Last activity: 2026-01-08 — Phase 3 completed
 
-Progress: █████░░░░░ 50%
+Progress: ██████░░░░ 60%
 
 ## Performance Metrics
 
