@@ -41,7 +41,6 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   const [success, setSuccess] = useState(false);
 
   const [name, setName] = useState(profile.name || "");
-  const [username, setUsername] = useState(profile.username || "");
   const [timezone, setTimezone] = useState(profile.timezone);
   const [timeFormat, setTimeFormat] = useState<TimeFormat>(profile.time_format || "12h");
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url || "");
@@ -59,7 +58,6 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       .from("users")
       .update({
         name: name || null,
-        username: username || null,
         timezone,
         time_format: timeFormat,
         avatar_url: avatarUrl || null,
@@ -67,11 +65,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       .eq("id", profile.id);
 
     if (updateError) {
-      if (updateError.code === "23505") {
-        setError("This username is already taken");
-      } else {
-        setError(updateError.message);
-      }
+      setError(updateError.message);
     } else {
       setSuccess(true);
       router.refresh();
@@ -117,17 +111,6 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         onChange={(e) => setName(e.target.value)}
         placeholder="Your name"
       />
-
-      <Input
-        label="Username"
-        id="username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-        placeholder="your-username"
-      />
-      <p className="text-sm text-gray-500 -mt-2">
-        Your booking link will be: {process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/book/{username || "username"}/...
-      </p>
 
       <Input
         label="Email"

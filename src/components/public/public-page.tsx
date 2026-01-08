@@ -21,7 +21,7 @@ interface PublicPageProps {
   links: (LinkType & { event_types: EventType | null })[];
   eventTypes: EventType[];
   socialProfiles: SocialProfile[];
-  /** Base URL for event type links. Defaults to /book/{username} */
+  /** Base URL for event type links. Defaults to /book */
   baseUrl?: string;
 }
 
@@ -105,7 +105,7 @@ export function PublicPage({
         link_type: "event" as const,
         title: et.title,
         description: et.description,
-        url: `/book/${user.username || user.id}/${et.slug}`,
+        url: `/book/${et.slug}`,
         event_type_id: et.id,
         display_style: "standard" as const,
         icon_type: "lucide" as const,
@@ -141,10 +141,9 @@ export function PublicPage({
 
   // Display info - use page_title from settings first, then fall back to user's name
   const displayName = settings.page_title || user.name || user.username;
-  const profileUsername = user.username || user.id;
 
-  // Base URL for event links (defaults to /book/{username})
-  const eventBaseUrl = baseUrl ?? `/book/${profileUsername}`;
+  // Base URL for event links (defaults to /book)
+  const eventBaseUrl = baseUrl ?? "/book";
 
   // Animation variants
   const containerVariants = {

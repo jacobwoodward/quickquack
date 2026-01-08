@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       bookingStartTime,
       bookingNotes: notes,
       successUrl: `${appUrl}/booking/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${appUrl}/book/${user.username}/${eventType.slug}?cancelled=true`,
+      cancelUrl: `${appUrl}/book/${eventType.slug}?cancelled=true`,
     });
 
     // Create pending payment record

@@ -14,12 +14,6 @@ export default async function EventTypesPage() {
 
   if (!user) return null;
 
-  const { data: profile } = await supabase
-    .from("users")
-    .select("username")
-    .eq("id", user.id)
-    .single();
-
   const { data: eventTypes } = await supabase
     .from("event_types")
     .select("*")
@@ -27,7 +21,6 @@ export default async function EventTypesPage() {
     .order("created_at", { ascending: false });
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const username = (profile as { username: string | null } | null)?.username || user.id;
 
   return (
     <div className="space-y-6">
@@ -76,20 +69,20 @@ export default async function EventTypesPage() {
                       </span>
                       <span className="text-gray-300">|</span>
                       <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
-                        /{username}/{eventType.slug}
+                        /book/{eventType.slug}
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Link
-                      href={`/book/${username}/${eventType.slug}`}
+                      href={`/book/${eventType.slug}`}
                       target="_blank"
                       className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md"
                       title="Preview"
                     >
                       <ExternalLink className="w-4 h-4" />
                     </Link>
-                    <CopyLinkButton link={`${baseUrl}/book/${username}/${eventType.slug}`} />
+                    <CopyLinkButton link={`${baseUrl}/book/${eventType.slug}`} />
                     <EventTypeActions eventTypeId={eventType.id} />
                   </div>
                 </div>
