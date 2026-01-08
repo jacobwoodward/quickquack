@@ -4,9 +4,45 @@ import { ReschedulePage } from "@/components/booking/reschedule-page";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
 import type { Booking, EventType, Schedule, Availability } from "@/lib/types/database";
+import type { Metadata } from "next";
 
 interface ReschedulePageProps {
   params: Promise<{ uid: string }>;
+}
+
+export async function generateMetadata({ params }: ReschedulePageProps): Promise<Metadata> {
+  const { uid } = await params;
+  const supabase = await createServiceClient();
+
+  // Get booking with user info
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select(`
+      event_types (title),
+      users!bookings_user_id_fkey (id, name)
+    `)
+    .eq("uid", uid)
+    .single();
+
+  if (!booking?.users) {
+    return { title: { absolute: "Reschedule" } };
+  }
+
+  // Get page settings for the user's configured title
+  const { data: pageSettings } = await supabase
+    .from("page_settings")
+    .select("page_title")
+    .eq("user_id", (booking.users as { id: string }).id)
+    .single();
+
+  const siteTitle = pageSettings?.page_title || (booking.users as { name: string | null }).name || "Reschedule";
+  const eventTitle = (booking.event_types as { title: string } | null)?.title || "Meeting";
+
+  return {
+    title: {
+      absolute: `Reschedule ${eventTitle} | ${siteTitle}`,
+    },
+  };
 }
 
 interface BookingWithRelations extends Booking {

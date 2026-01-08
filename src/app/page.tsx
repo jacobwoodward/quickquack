@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const user = await getSingleUser();
 
   if (!user) {
-    return { title: "QuickQuack" };
+    return { title: { absolute: "Welcome" } };
   }
 
   const supabase = await createServiceClient();

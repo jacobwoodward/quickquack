@@ -2,9 +2,50 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { BookingPage } from "@/components/booking/booking-page";
 import type { User, EventType, Schedule, Availability } from "@/lib/types/database";
+import type { Metadata } from "next";
 
 interface BookingPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: BookingPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createServiceClient();
+
+  // Get the single user
+  const { data: userData } = await supabase
+    .from("users")
+    .select("*")
+    .limit(1)
+    .single();
+
+  if (!userData) {
+    return { title: { absolute: "Book" } };
+  }
+
+  // Get page settings for the user's configured title
+  const { data: pageSettings } = await supabase
+    .from("page_settings")
+    .select("page_title")
+    .eq("user_id", userData.id)
+    .single();
+
+  // Get event type for the title
+  const { data: eventType } = await supabase
+    .from("event_types")
+    .select("title")
+    .eq("user_id", userData.id)
+    .eq("slug", slug)
+    .single();
+
+  const siteTitle = pageSettings?.page_title || userData.name || "Book";
+  const eventTitle = eventType?.title || "Book";
+
+  return {
+    title: {
+      absolute: `${eventTitle} | ${siteTitle}`,
+    },
+  };
 }
 
 interface ScheduleWithAvailability extends Schedule {
