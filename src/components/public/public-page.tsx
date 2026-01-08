@@ -305,10 +305,8 @@ export function PublicPage({
 
       </motion.div>
 
-      {/* Custom CSS */}
-      {settings.custom_css && (
-        <style dangerouslySetInnerHTML={{ __html: settings.custom_css }} />
-      )}
+      {/* Custom CSS - using children instead of dangerouslySetInnerHTML for XSS prevention */}
+      {settings.custom_css && <style>{settings.custom_css}</style>}
     </div>
   );
 }

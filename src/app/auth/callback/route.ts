@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAppUrl } from "@/lib/config";
+import { validateRedirectUrl } from "@/lib/utils/redirect";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-  const redirectTo = searchParams.get("redirectTo") || "/dashboard";
+  const redirectTo = validateRedirectUrl(searchParams.get("redirectTo"));
   const appUrl = getAppUrl();
 
   if (code) {
