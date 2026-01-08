@@ -5,6 +5,19 @@ import { motion } from "framer-motion";
 import type { LinkWithEventType, ButtonStyle } from "@/lib/types/database";
 
 // Lucide icons for different link types
+// Format price for display - removes .00 decimals
+function formatEventPrice(priceCents: number | null | undefined, isPaid: boolean | undefined): string {
+  if (!isPaid || !priceCents || priceCents === 0) {
+    return "FREE";
+  }
+  const dollars = priceCents / 100;
+  // Only show decimals if they're not .00
+  if (dollars % 1 === 0) {
+    return `$${dollars.toFixed(0)}`;
+  }
+  return `$${dollars.toFixed(2)}`;
+}
+
 const linkTypeIcons: Record<string, React.ReactNode> = {
   event: (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -115,7 +128,7 @@ function StandardLink({ link, buttonStyle = "rounded", defaultButtonColor, defau
       {getIcon(link)}
       <span className="flex-1 font-medium text-center">{link.title}</span>
       {link.link_type === "event" && link.event_type && (
-        <span className="text-sm opacity-70">{link.event_type.length}m</span>
+        <span className="text-sm opacity-70">{formatEventPrice(link.event_type.price_cents, link.event_type.is_paid)}</span>
       )}
     </>
   );
@@ -203,7 +216,7 @@ function FeaturedLink({ link, defaultButtonColor, defaultTextColor, onClick, isP
         )}
         {link.link_type === "event" && link.event_type && (
           <p className="text-sm opacity-60 mt-2">
-            {link.event_type.length} minute meeting
+            {formatEventPrice(link.event_type.price_cents, link.event_type.is_paid)}
           </p>
         )}
       </div>
