@@ -17,5 +17,12 @@ function getSupabaseConfig() {
 
 export function createClient() {
   const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
-  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
+  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey, {
+    cookieOptions: {
+      // Persist session for 1 year (until user explicitly logs out)
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    },
+  });
 }

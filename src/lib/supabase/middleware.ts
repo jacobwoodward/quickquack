@@ -2,6 +2,13 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/lib/types/database";
 
+// Shared cookie options for persistent sessions (1 year)
+const cookieOptions = {
+  maxAge: 60 * 60 * 24 * 365,
+  sameSite: "lax" as const,
+  secure: process.env.NODE_ENV === "production",
+};
+
 export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -37,7 +44,7 @@ export async function updateSession(request: NextRequest) {
             request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, { ...cookieOptions, ...options })
           );
         },
       },
