@@ -239,7 +239,7 @@ GOOGLE_CLIENT_SECRET=your-client-secret
 # Required - Your domain
 NEXT_PUBLIC_APP_URL=https://your-domain.com
 
-# Optional - Email notifications
+# Required - Email notifications
 RESEND_API_KEY=re_xxxxx
 EMAIL_FROM=Your Name <bookings@your-domain.com>
 

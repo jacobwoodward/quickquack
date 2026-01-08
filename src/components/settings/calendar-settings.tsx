@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -35,34 +35,82 @@ export function CalendarSettings({
     destinationCalendarId || "primary"
   );
   const [isSaving, setIsSaving] = useState(false);
+  const hasAutoSaved = useRef(false);
+  const isFirstConnection = selectedCalendarIds.length === 0 && !destinationCalendarId;
 
   // Fetch calendars when connected
   useEffect(() => {
-    if (isConnected && credentialId) {
-      fetchCalendars();
-    }
-  }, [isConnected, credentialId]);
+    if (!isConnected || !credentialId) return;
 
-  const fetchCalendars = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/calendars");
-      const data = await response.json();
-      if (data.calendars) {
-        setCalendars(data.calendars);
-        // Set default selection if none selected
-        if (selectedIds.length === 0) {
-          const primaryCalendar = data.calendars.find((c: CalendarInfo) => c.primary);
-          if (primaryCalendar) {
-            setSelectedIds([primaryCalendar.id]);
-            setDestinationId(primaryCalendar.id);
+    let isMounted = true;
+
+    const fetchCalendars = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/calendars");
+        const data = await response.json();
+
+        if (!isMounted) return;
+
+        if (data.calendars) {
+          setCalendars(data.calendars);
+
+          // Auto-save primary calendar if this is a fresh connection
+          if (isFirstConnection && !hasAutoSaved.current) {
+            const primaryCalendar = data.calendars.find((c: CalendarInfo) => c.primary);
+            if (primaryCalendar) {
+              hasAutoSaved.current = true;
+              // Update local state to match what we're saving
+              setSelectedIds([primaryCalendar.id]);
+              setDestinationId(primaryCalendar.id);
+              // Auto-save to database (fire and forget)
+              autoSaveDefaults(primaryCalendar.id);
+            }
           }
         }
+      } catch (error) {
+        console.error("Failed to fetch calendars:", error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
+    };
+
+    fetchCalendars();
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected, credentialId]);
+
+  // Auto-save function (called imperatively, not in an effect)
+  const autoSaveDefaults = async (primaryCalendarId: string) => {
+    if (!credentialId) return;
+
+    const supabase = createClient();
+
+    try {
+      // Save selected calendar (for conflict checking)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from("selected_calendars").insert({
+        user_id: userId,
+        credential_id: credentialId,
+        external_id: primaryCalendarId,
+      });
+
+      // Save destination calendar (where new events are created)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from("destination_calendars").insert({
+        user_id: userId,
+        credential_id: credentialId,
+        external_id: primaryCalendarId,
+      });
+
+      console.log("Auto-saved default calendar settings");
     } catch (error) {
-      console.error("Failed to fetch calendars:", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Failed to auto-save calendar settings:", error);
     }
   };
 

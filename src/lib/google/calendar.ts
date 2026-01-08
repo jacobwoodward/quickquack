@@ -1,5 +1,5 @@
 import { google, calendar_v3 } from "googleapis";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import type { Credential } from "@/lib/types/database";
 
 interface GoogleTokens {
@@ -33,7 +33,7 @@ export class GoogleCalendarService {
 
     // Handle token refresh
     oauth2Client.on("tokens", async (newTokens) => {
-      const supabase = await createClient();
+      const supabase = await createServiceClient();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (supabase as any)
         .from("credentials")
@@ -224,7 +224,7 @@ export class GoogleCalendarService {
 export async function getGoogleCalendarService(
   userId: string
 ): Promise<GoogleCalendarService | null> {
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
 
   const { data: credential } = await supabase
     .from("credentials")

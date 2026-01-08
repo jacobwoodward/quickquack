@@ -22,7 +22,7 @@ export interface AppConfig {
   // Required - App URL
   appUrl: string;
 
-  // Optional - Email (Resend)
+  // Required - Email (Resend)
   email: {
     resendApiKey: string | null;
     fromAddress: string;
@@ -89,8 +89,8 @@ export function getConfigStatus(): ConfigStatus[] {
     {
       service: "Resend Email",
       configured: Boolean(process.env.RESEND_API_KEY),
-      required: false,
-      description: "Email notifications (booking confirmations, reminders)",
+      required: true,
+      description: "Email notifications and booking confirmations with calendar invites",
       helpUrl: "https://resend.com/docs/introduction",
       missingVars: [
         !process.env.RESEND_API_KEY && "RESEND_API_KEY",
