@@ -29,7 +29,7 @@ None
 **Plans**: 2 plans (4 tasks total)
 
 Plans:
-- [ ] 01-01: Fix localhost redirect after OAuth (use getAppUrl() in callback)
+- [x] 01-01: Fix localhost redirect after OAuth (use getAppUrl() in callback)
 - [ ] 01-02: Fix post-login navigation to dashboard (middleware redirect from / to /dashboard)
 
 ### Phase 2: Architecture Review
@@ -84,7 +84,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Auth Bug Fixes | 0/2 | Not started | - |
+| 1. Auth Bug Fixes | 1/2 | In progress | - |
 | 2. Architecture Review | 0/3 | Not started | - |
 | 3. Security Audit | 0/4 | Not started | - |
 | 4. Documentation | 0/3 | Not started | - |
