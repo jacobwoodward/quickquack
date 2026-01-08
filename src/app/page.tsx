@@ -42,7 +42,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = pageSettings?.bio || `Book time with ${user.name || "me"}`;
 
   return {
-    title,
+    title: {
+      absolute: title, // Don't append " | QuickQuack" to the public page title
+    },
     description,
   };
 }

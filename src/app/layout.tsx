@@ -13,7 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dashboard",
+  title: {
+    default: "QuickQuack",
+    template: "%s | QuickQuack",
+  },
   description: "Scheduling and booking management",
   icons: {
     icon: [], // Explicitly disable favicon
