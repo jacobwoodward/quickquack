@@ -5,27 +5,13 @@ import { getStripeClient, getWebhookSecret } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getGoogleCalendarService } from "@/lib/google/calendar";
 import { sendBookingConfirmation } from "@/lib/email/notifications";
-import { parseISO, setHours, setMinutes, addMinutes, parse } from "date-fns";
+import { parseISO, setHours, setMinutes, addMinutes } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
+import { parseTimeString } from "@/lib/utils/date";
 import type { EventType, User, Booking } from "@/lib/types/database";
 
 // Disable body parsing - Stripe needs raw body for signature verification
 export const runtime = "nodejs";
-
-/**
- * Parse time string in either 12h (h:mm a) or 24h (HH:mm) format
- */
-function parseTimeString(time: string): { hours: number; minutes: number } {
-  const is12Hour = /am|pm/i.test(time);
-
-  if (is12Hour) {
-    const parsed = parse(time, "h:mm a", new Date());
-    return { hours: parsed.getHours(), minutes: parsed.getMinutes() };
-  } else {
-    const [hours, minutes] = time.split(":").map(Number);
-    return { hours, minutes };
-  }
-}
 
 /**
  * Create a booking after successful payment
