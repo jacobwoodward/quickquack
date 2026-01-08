@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Scheduling and booking management",
+  icons: {
+    icon: [], // Explicitly disable favicon
+  },
 };
 
 export default function RootLayout({
