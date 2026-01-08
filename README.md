@@ -1,22 +1,40 @@
 # QuickQuack
 
-A free, open-source scheduling app you can host yourself. Let people book time on your calendar without the monthly fees.
+**Linktree + Calendly = QuickQuack**
+
+A free, open-source link-in-bio and scheduling app you can host yourself. Stop paying $204/year for two separate subscriptions.
 
 ## What is QuickQuack?
 
-QuickQuack is a self-hosted alternative to Calendly and Cal.com. It connects to your Google Calendar to:
+QuickQuack combines a **link-in-bio page** (like Linktree) with **appointment scheduling** (like Calendly) into one self-hosted app. Your visitors can see all your links AND book time with you—from a single page you control.
 
-- **Show your availability** - Automatically detect busy times from your calendar
-- **Let people book meetings** - Share a link and let guests pick a time that works
-- **Create calendar events** - Automatically add meetings to your calendar with Google Meet links
-- **Send notifications** - Email confirmations, reminders, and updates
+### Link-in-Bio Features
+
+- **Customizable themes** - Multiple design options to match your brand
+- **Social media links** - Connect 15+ platforms (Instagram, TikTok, YouTube, etc.)
+- **Click analytics** - See which links get the most engagement
+- **Custom branding** - Your domain, your colors, no "Powered by" badges
+- **Drag-and-drop ordering** - Arrange links however you want
+
+### Scheduling Features
+
+- **Google Calendar sync** - Automatically shows your real availability
+- **Google Meet integration** - Auto-generates meeting links for video calls
+- **Stripe payments** - Accept payments for consultations
+- **Email notifications** - Confirmations, reminders, and updates
+- **Buffer times** - Add breaks between meetings
+- **Booking windows** - Control how far ahead people can book
 
 ### Why Self-Host?
 
-- **Free forever** - No subscription fees, no per-booking limits
-- **Own your data** - Your calendar data stays in your own database
-- **Customize everything** - Change colors, wording, or even the code
-- **Privacy-focused** - No tracking, no selling your data
+- **Zero monthly fees** - No subscriptions, no per-booking limits, free forever
+- **Own your data** - Visitor analytics, bookings, and links stay in your database
+- **No vendor lock-in** - Export everything, switch anytime
+- **Privacy-focused** - No tracking scripts, no selling your data
+- **Custom domain** - Use your own URL instead of someone else's subdomain
+- **Fully customizable** - Change anything in the code
+
+---
 
 ## Quick Start
 
@@ -146,7 +164,7 @@ You'll need accounts on these free services:
 1. Visit your deployed app
 2. Click **Sign in with Google**
 3. Authorize access to your calendar
-4. You're in! Start creating event types.
+4. You're in! Set up your profile, add links, and create event types.
 
 ---
 
@@ -230,8 +248,8 @@ To get the latest features:
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/jacobwoodward/jacobwoodward-dev/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/jacobwoodward/jacobwoodward-dev/discussions)
+- **Issues**: [GitHub Issues](https://github.com/jacobwoodward/quickquack/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/jacobwoodward/quickquack/discussions)
 
 ---
 
