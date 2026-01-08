@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-08)
 
 **Core value:** The app must work end-to-end: login, create event types, share links, accept bookings.
-**Current focus:** Phase 4 — Documentation
+**Current focus:** Phase 5 — Release Polish
 
 ## Current Position
 
-Phase: 4 of 5 (Documentation)
-Plan: 1 of 3 (04-01: Write comprehensive README)
+Phase: 5 of 5 (Release Polish)
+Plan: 1 of 2 (05-01: Final testing and bug fixes)
 Status: Ready to plan
-Last activity: 2026-01-08 — Phase 3 completed
+Last activity: 2026-01-08 — Phase 4 completed
 
-Progress: ██████░░░░ 60%
+Progress: ████████░░ 80%
 
 ## Performance Metrics
 
