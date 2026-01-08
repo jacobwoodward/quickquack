@@ -39,19 +39,23 @@ export async function generateMetadata({ params }: BookingPageProps): Promise<Me
   }
 
   // Get page settings for the user's configured title
-  const { data: pageSettings } = await supabase
+  const { data: pageSettingsData } = await supabase
     .from("page_settings")
     .select("page_title")
     .eq("user_id", user.id)
     .single();
 
+  const pageSettings = pageSettingsData as { page_title: string | null } | null;
+
   // Get event type for the title
-  const { data: eventType } = await supabase
+  const { data: eventTypeData } = await supabase
     .from("event_types")
     .select("title")
     .eq("user_id", user.id)
     .eq("slug", slug)
     .single();
+
+  const eventType = eventTypeData as { title: string } | null;
 
   const siteTitle = pageSettings?.page_title || user.name || "Book";
   const eventTitle = eventType?.title || "Book";
