@@ -76,12 +76,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect logged-in users from root to dashboard
-  if (request.nextUrl.pathname === "/" && user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
-  }
+  // Note: We intentionally do NOT redirect logged-in users from root "/"
+  // The root page shows the user's public link-in-bio profile, which they
+  // should be able to preview while logged in.
 
   return supabaseResponse;
 }
