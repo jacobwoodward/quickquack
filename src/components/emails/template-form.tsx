@@ -13,7 +13,7 @@ import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 interface EmailTemplate {
   id: string;
   user_id: string;
-  template_type: "confirmation" | "reminder" | "cancellation" | "rescheduled";
+  template_type: "confirmation" | "reminder" | "cancellation" | "rescheduled" | "host_notification";
   subject: string;
   greeting: string | null;
   body_text: string | null;
@@ -25,7 +25,7 @@ interface EmailTemplate {
 
 interface EmailTemplateFormProps {
   userId: string;
-  templateType: "confirmation" | "reminder" | "cancellation" | "rescheduled";
+  templateType: "confirmation" | "reminder" | "cancellation" | "rescheduled" | "host_notification";
   existingTemplate?: EmailTemplate;
   defaults: {
     subject: string;
