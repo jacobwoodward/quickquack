@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getAppUrl } from "@/lib/config";
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const redirectTo = searchParams.get("redirectTo") || "/dashboard";
+  const appUrl = getAppUrl();
 
   if (code) {
     const supabase = await createClient();
@@ -58,10 +60,10 @@ export async function GET(request: Request) {
         }
       }
 
-      return NextResponse.redirect(`${origin}${redirectTo}`);
+      return NextResponse.redirect(`${appUrl}${redirectTo}`);
     }
   }
 
   // Return error page
-  return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+  return NextResponse.redirect(`${appUrl}/login?error=auth_failed`);
 }
