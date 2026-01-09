@@ -1,9 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import Link from "next/link";
 import { Calendar, Clock, User, Video } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -15,11 +13,7 @@ export default async function DashboardPage() {
   // Get upcoming bookings
   const { data: upcomingBookings } = await supabase
     .from("bookings")
-    .select(`
-      *,
-      event_types (title, length),
-      attendees (name, email, timezone)
-    `)
+    .select()
     .eq("user_id", user.id)
     .eq("status", "ACCEPTED")
     .gte("start_time", new Date().toISOString())
@@ -29,11 +23,7 @@ export default async function DashboardPage() {
   // Get past bookings
   const { data: pastBookings } = await supabase
     .from("bookings")
-    .select(`
-      *,
-      event_types (title, length),
-      attendees (name, email, timezone)
-    `)
+    .select()
     .eq("user_id", user.id)
     .lt("start_time", new Date().toISOString())
     .order("start_time", { ascending: false })
@@ -109,13 +99,8 @@ export default async function DashboardPage() {
 
       {/* Upcoming Bookings */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <CardTitle>Upcoming Bookings</CardTitle>
-          <Link href="/bookings">
-            <Button variant="ghost" size="sm">
-              View all
-            </Button>
-          </Link>
         </CardHeader>
         <CardContent>
           {upcomingBookings && upcomingBookings.length > 0 ? (
@@ -180,7 +165,7 @@ function BookingItem({ booking, isPast }: BookingItemProps) {
   const attendee = booking.attendees?.[0];
 
   return (
-    <div className={`py-4 ${isPast ? "opacity-60" : ""}`}>
+    <div className={}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2">
