@@ -43,3 +43,6 @@ next-env.d.ts
 
 # MCP config (contains project references)
 .mcp.json
+
+# Claude Code
+.claude/
