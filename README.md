@@ -4,6 +4,8 @@
 
 A free, open-source link-in-bio and scheduling app you can host yourself. Stop paying $204/year for two separate subscriptions.
 
+[![Watch the QuickQuack Demo](https://img.youtube.com/vi/AyrHdHsGf5M/maxresdefault.jpg)](https://www.youtube.com/watch?v=AyrHdHsGf5M)
+
 ---
 
 ## Table of Contents
