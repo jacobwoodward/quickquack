@@ -144,7 +144,7 @@ Before starting, you'll need free accounts on:
 | [Supabase](https://supabase.com) | Database & authentication | 500MB database, 50K monthly active users |
 | [Google Cloud](https://console.cloud.google.com) | Calendar integration & OAuth | Free for personal use |
 | [Vercel](https://vercel.com) | Hosting | 100GB bandwidth/month |
-| [Resend](https://resend.com) *(optional)* | Email notifications | 3,000 emails/month |
+| [Resend](https://resend.com) | Email notifications | 3,000 emails/month |
 | [Stripe](https://stripe.com) *(optional)* | Payment processing | No monthly fees (2.9% + 30¢ per transaction) |
 
 **Technical Requirements:**
@@ -162,7 +162,7 @@ Before starting, you'll need free accounts on:
 1. Click the **Fork** button at the top of this repository
 2. Clone your forked repository:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/quickquack.git
+   git clone https://github.com/jacobwoodward/quickquack.git
    cd quickquack
    npm install
    ```
