@@ -13,7 +13,11 @@ export default async function DashboardPage() {
   // Get upcoming bookings
   const { data: upcomingBookings } = await supabase
     .from("bookings")
-    .select()
+    .select(`
+      *,
+      event_types (title, length),
+      attendees (name, email, timezone)
+    `)
     .eq("user_id", user.id)
     .eq("status", "ACCEPTED")
     .gte("start_time", new Date().toISOString())
@@ -23,7 +27,11 @@ export default async function DashboardPage() {
   // Get past bookings
   const { data: pastBookings } = await supabase
     .from("bookings")
-    .select()
+    .select(`
+      *,
+      event_types (title, length),
+      attendees (name, email, timezone)
+    `)
     .eq("user_id", user.id)
     .lt("start_time", new Date().toISOString())
     .order("start_time", { ascending: false })
@@ -165,7 +173,7 @@ function BookingItem({ booking, isPast }: BookingItemProps) {
   const attendee = booking.attendees?.[0];
 
   return (
-    <div className={}>
+    <div className={`py-4 ${isPast ? "opacity-60" : ""}`}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2">
