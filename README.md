@@ -83,7 +83,7 @@ QuickQuack combines a **link-in-bio page** (like Linktree) with **appointment sc
 - **Automatic refunds** - Handle cancellations gracefully
 - **Payment tracking** - View payment history in dashboard
 
-### Notifications (Optional)
+### Notifications
 
 - **Email confirmations** - Automatic booking confirmations
 - **Reminder emails** - Configurable reminders before meetings
