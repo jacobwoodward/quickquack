@@ -11,7 +11,7 @@ import { Select } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ThemeGrid, LivePreview, themeConfigs } from "./theme-preview";
 import { ColorPicker, GradientPicker } from "./color-picker";
-import { AvatarUploader, ImageUploader } from "./image-uploader";
+import { ImageUploader } from "./image-uploader";
 import { IconStyleGrid } from "./social-icons";
 import type {
   PageSettings,

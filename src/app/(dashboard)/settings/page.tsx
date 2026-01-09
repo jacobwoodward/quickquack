@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProfileForm } from "@/components/settings/profile-form";
 import { CalendarSettings } from "@/components/settings/calendar-settings";
 import { Check, X } from "lucide-react";
-import type { User, Credential, SelectedCalendar, DestinationCalendar } from "@/lib/types/database";
+import type { Credential, SelectedCalendar, DestinationCalendar } from "@/lib/types/database";
 
 export default async function SettingsPage() {
   const supabase = await createClient();

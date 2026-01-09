@@ -8,7 +8,6 @@ import {
   isBefore,
   areIntervalsOverlapping,
   format,
-  parseISO,
   addDays,
 } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -220,7 +219,7 @@ export function getAvailableDates(params: {
   availability: Availability[];
   userTimezone: string;
 }): Date[] {
-  const { startDate, endDate, availability, userTimezone } = params;
+  const { startDate, endDate, availability, userTimezone: _userTimezone } = params;
   const availableDates: Date[] = [];
 
   let currentDate = startDate;

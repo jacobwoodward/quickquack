@@ -7,6 +7,7 @@ import {
   generateOutlookUrl,
   generateYahooCalendarUrl,
 } from "@/lib/calendar/ics";
+import { escapeHtml } from "@/lib/utils/html";
 
 // Only initialize Resend if API key is present
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
@@ -230,7 +231,7 @@ export async function sendBookingConfirmation(
             </div>
 
             <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
-              <h2 style="color: #1a1a1a; font-size: 18px; margin: 0 0 16px 0;">${eventTitle}</h2>
+              <h2 style="color: #1a1a1a; font-size: 18px; margin: 0 0 16px 0;">${escapeHtml(eventTitle)}</h2>
 
               <div style="margin-bottom: 12px;">
                 <p style="color: #666; font-size: 14px; margin: 0;">When</p>
@@ -240,14 +241,14 @@ export async function sendBookingConfirmation(
 
               <div style="margin-bottom: 12px;">
                 <p style="color: #666; font-size: 14px; margin: 0;">Who</p>
-                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">${hostName}</p>
+                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">${escapeHtml(hostName)}</p>
               </div>
 
               ${location ? `
               <div style="margin-bottom: 12px;">
                 <p style="color: #666; font-size: 14px; margin: 0;">Where</p>
                 <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">
-                  ${location.startsWith("http") ? `<a href="${location}" style="color: #2563eb;">${location}</a>` : location}
+                  ${location.startsWith("http") ? `<a href="${escapeHtml(location)}" style="color: #2563eb;">${escapeHtml(location)}</a>` : escapeHtml(location)}
                 </p>
               </div>
               ` : ""}
@@ -351,7 +352,7 @@ export async function sendBookingCancellation(
             </div>
 
             <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
-              <h2 style="color: #1a1a1a; font-size: 18px; margin: 0 0 16px 0; text-decoration: line-through;">${eventTitle}</h2>
+              <h2 style="color: #1a1a1a; font-size: 18px; margin: 0 0 16px 0; text-decoration: line-through;">${escapeHtml(eventTitle)}</h2>
 
               <div style="margin-bottom: 12px;">
                 <p style="color: #666; font-size: 14px; margin: 0;">When</p>
@@ -360,7 +361,7 @@ export async function sendBookingCancellation(
 
               <div style="margin-bottom: 12px;">
                 <p style="color: #666; font-size: 14px; margin: 0;">Who</p>
-                <p style="color: #999; font-size: 16px; margin: 4px 0 0 0;">${hostName}</p>
+                <p style="color: #999; font-size: 16px; margin: 4px 0 0 0;">${escapeHtml(hostName)}</p>
               </div>
 
               ${wasRefunded ? `
@@ -494,7 +495,7 @@ export async function sendBookingRescheduled(
             </div>
 
             <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
-              <h2 style="color: #1a1a1a; font-size: 18px; margin: 0 0 16px 0;">${eventTitle}</h2>
+              <h2 style="color: #1a1a1a; font-size: 18px; margin: 0 0 16px 0;">${escapeHtml(eventTitle)}</h2>
 
               <div style="margin-bottom: 12px;">
                 <p style="color: #666; font-size: 14px; margin: 0;">Previous time</p>
@@ -509,14 +510,14 @@ export async function sendBookingRescheduled(
 
               <div style="margin-bottom: 12px;">
                 <p style="color: #666; font-size: 14px; margin: 0;">Who</p>
-                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">${hostName}</p>
+                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">${escapeHtml(hostName)}</p>
               </div>
 
               ${location ? `
               <div style="margin-bottom: 12px;">
                 <p style="color: #666; font-size: 14px; margin: 0;">Where</p>
                 <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">
-                  ${location.startsWith("http") ? `<a href="${location}" style="color: #2563eb;">${location}</a>` : location}
+                  ${location.startsWith("http") ? `<a href="${escapeHtml(location)}" style="color: #2563eb;">${escapeHtml(location)}</a>` : escapeHtml(location)}
                 </p>
               </div>
               ` : ""}
@@ -658,7 +659,7 @@ export async function sendBookingReminder(
             ` : ""}
 
             <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
-              <h2 style="color: #1a1a1a; font-size: 18px; margin: 0 0 16px 0;">${eventTitle}</h2>
+              <h2 style="color: #1a1a1a; font-size: 18px; margin: 0 0 16px 0;">${escapeHtml(eventTitle)}</h2>
 
               <div style="margin-bottom: 12px;">
                 <p style="color: #666; font-size: 14px; margin: 0;">When</p>
@@ -668,14 +669,14 @@ export async function sendBookingReminder(
 
               <div style="margin-bottom: 12px;">
                 <p style="color: #666; font-size: 14px; margin: 0;">Who</p>
-                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">${hostName}</p>
+                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">${escapeHtml(hostName)}</p>
               </div>
 
               ${location ? `
               <div style="margin-bottom: 12px;">
                 <p style="color: #666; font-size: 14px; margin: 0;">Where</p>
                 <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">
-                  ${location.startsWith("http") ? `<a href="${location}" style="color: #2563eb;">${location}</a>` : location}
+                  ${location.startsWith("http") ? `<a href="${escapeHtml(location)}" style="color: #2563eb;">${escapeHtml(location)}</a>` : escapeHtml(location)}
                 </p>
               </div>
               ` : ""}
@@ -787,13 +788,13 @@ export async function sendHostNotification(
             </div>
 
             <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
-              <h2 style="color: #1a1a1a; font-size: 18px; margin: 0 0 16px 0;">${eventTitle}</h2>
+              <h2 style="color: #1a1a1a; font-size: 18px; margin: 0 0 16px 0;">${escapeHtml(eventTitle)}</h2>
 
               <div style="margin-bottom: 12px;">
                 <p style="color: #666; font-size: 14px; margin: 0;">Guest</p>
-                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">${guestName}</p>
+                <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">${escapeHtml(guestName)}</p>
                 <p style="color: #666; font-size: 14px; margin: 4px 0 0 0;">
-                  <a href="mailto:${guestEmail}" style="color: #2563eb;">${guestEmail}</a>
+                  <a href="mailto:${encodeURIComponent(guestEmail)}" style="color: #2563eb;">${escapeHtml(guestEmail)}</a>
                 </p>
               </div>
 
@@ -807,7 +808,7 @@ export async function sendHostNotification(
               <div style="margin-bottom: 12px;">
                 <p style="color: #666; font-size: 14px; margin: 0;">Where</p>
                 <p style="color: #1a1a1a; font-size: 16px; margin: 4px 0 0 0;">
-                  ${location.startsWith("http") ? `<a href="${location}" style="color: #2563eb;">${location}</a>` : location}
+                  ${location.startsWith("http") ? `<a href="${escapeHtml(location)}" style="color: #2563eb;">${escapeHtml(location)}</a>` : escapeHtml(location)}
                 </p>
               </div>
               ` : ""}
@@ -816,7 +817,7 @@ export async function sendHostNotification(
               <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
                 <p style="color: #666; font-size: 14px; margin: 0;">Message from guest</p>
                 <div style="background: #f9fafb; border-radius: 6px; padding: 12px; margin-top: 8px;">
-                  <p style="color: #1a1a1a; font-size: 14px; margin: 0; white-space: pre-wrap;">${notes}</p>
+                  <p style="color: #1a1a1a; font-size: 14px; margin: 0; white-space: pre-wrap;">${escapeHtml(notes)}</p>
                 </div>
               </div>
               ` : ""}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { MoreVertical, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 interface EventTypeActionsProps {

@@ -50,7 +50,7 @@ interface SortableItemProps<T> {
   isDragging?: boolean;
 }
 
-function SortableItem<T>({ id, item, renderItem, isDragging }: SortableItemProps<T>) {
+function SortableItem<T>({ id, item, renderItem, isDragging: _isDragging }: SortableItemProps<T>) {
   const {
     attributes,
     listeners,

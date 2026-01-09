@@ -63,8 +63,8 @@ export function BookingPage({ user, eventType, schedule }: BookingPageProps) {
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [bookingUid, setBookingUid] = useState<string | null>(null);
-  const [meetingUrl, setMeetingUrl] = useState<string | null>(null);
+  const [_bookingUid, setBookingUid] = useState<string | null>(null);
+  const [_meetingUrl, setMeetingUrl] = useState<string | null>(null);
 
   // Form state
   const [name, setName] = useState("");

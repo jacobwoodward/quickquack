@@ -359,7 +359,7 @@ export function SocialLinksSettings({ userId, initialProfiles }: SocialLinksSett
     try {
       await Promise.all(updates);
       router.refresh();
-    } catch (err) {
+    } catch (_err) {
       setError("Failed to save new order");
     }
   };

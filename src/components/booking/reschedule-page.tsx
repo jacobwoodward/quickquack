@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { format, addDays, startOfDay, parseISO } from "date-fns";
+import { format, addDays, startOfDay } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Globe, ChevronLeft, ChevronRight, Check, ArrowRight } from "lucide-react";
+import { Clock, Globe, ChevronLeft, ChevronRight, Check, ArrowRight } from "lucide-react";
 import type { Booking, EventType, Schedule, Availability, Attendee } from "@/lib/types/database";
 
 interface ReschedulePageProps {
@@ -29,7 +29,7 @@ export function ReschedulePage({
   eventType,
   user,
   schedule,
-  attendee,
+  attendee: _attendee,
 }: ReschedulePageProps) {
   const [step, setStep] = useState<"date" | "time" | "confirmed">("date");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);

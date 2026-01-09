@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { DraggableList, DraggableItemCard } from "./draggable-list";
 import { LinkEditor, AddLinkButton } from "./link-editor";
-import { LivePreview, themeConfigs } from "./theme-preview";
+import { LivePreview } from "./theme-preview";
 import { Card, CardContent } from "@/components/ui/card";
 import type {
   Link,
@@ -41,7 +41,7 @@ export function LinksManager({
   const [links, setLinks] = useState<LinkWithEventType[]>(initialLinks);
   const [editingLink, setEditingLink] = useState<Link | null>(null);
   const [isAddingLink, setIsAddingLink] = useState(false);
-  const [addingLinkType, setAddingLinkType] = useState<LinkType>("url");
+  const [_addingLinkType, setAddingLinkType] = useState<LinkType>("url");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
