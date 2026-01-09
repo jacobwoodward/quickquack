@@ -1,90 +1,36 @@
-# Roadmap: QuickQuack Stabilization
+# Roadmap: QuickQuack
 
-## Overview
+## Milestones
 
-This roadmap takes QuickQuack from a buggy state to open source release. We fix critical auth bugs, review architecture and security, create comprehensive documentation, and polish for public release. The goal is a stable, secure, well-documented scheduling app ready for self-hosting.
+- ✅ **[v1.0 Stabilization](milestones/v1.0-ROADMAP.md)** — Phases 1-5 (shipped 2026-01-08)
 
-## Domain Expertise
+## Completed Milestones
 
-None
+<details>
+<summary>✅ v1.0 Stabilization (Phases 1-5) — SHIPPED 2026-01-08</summary>
 
-## Phases
+Fixed critical auth bugs, reviewed architecture and security, created comprehensive documentation, and polished for open source release.
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+- [x] Phase 1: Auth Bug Fixes (2/2 plans) — completed 2026-01-08
+- [x] Phase 2: Architecture Review (3/3 plans) — completed 2026-01-08
+- [x] Phase 3: Security Audit (4/4 plans) — completed 2026-01-08
+- [x] Phase 4: Documentation (3/3 plans) — completed 2026-01-08
+- [x] Phase 5: Release Polish (2/2 plans) — completed 2026-01-08
 
-- [x] **Phase 1: Auth Bug Fixes** - Fix production auth redirect and post-login navigation
-- [x] **Phase 2: Architecture Review** - Code quality audit and pattern consistency
-- [x] **Phase 3: Security Audit** - OWASP compliance and vulnerability assessment
-- [x] **Phase 4: Documentation** - README, self-hosting guide, and contributor docs
-- [x] **Phase 5: Release Polish** - Final testing, cleanup, and release prep
+See [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) for full details.
 
-## Phase Details
-
-### Phase 1: Auth Bug Fixes
-**Goal**: Fix the two blocking auth bugs so users can log in and access the dashboard
-**Depends on**: Nothing (first phase)
-**Research**: Completed (inline during planning)
-**Plans**: 2 plans (4 tasks total)
-
-Plans:
-- [x] 01-01: Fix localhost redirect after OAuth (use getAppUrl() in callback)
-- [x] 01-02: Fix post-login navigation to dashboard (middleware redirect from / to /dashboard)
-
-### Phase 2: Architecture Review
-**Goal**: Audit codebase for quality, consistency, and maintainability
-**Depends on**: Phase 1 (need working app to test patterns)
-**Research**: Completed (codebase analysis)
-**Plans**: 3 plans (7 tasks)
-
-Plans:
-- [x] 02-01: Review component patterns and code organization
-- [x] 02-02: Review API routes and data flow patterns
-- [x] 02-03: Address identified issues (extract utilities, add UI primitives)
-
-### Phase 3: Security Audit
-**Goal**: Comprehensive security review before public release
-**Depends on**: Phase 2 (architecture should be clean first)
-**Research**: Completed (OWASP Top 10 analysis)
-**Plans**: 4 plans (6 tasks)
-
-Plans:
-- [x] 03-01: Review authentication and authorization flows
-- [x] 03-02: Audit Supabase RLS policies and data exposure
-- [x] 03-03: Review API security and input validation
-- [x] 03-04: Fix identified vulnerabilities (Critical/High severity)
-
-### Phase 4: Documentation
-**Goal**: Create comprehensive docs for open source release
-**Depends on**: Phase 3 (document the secured, reviewed codebase)
-**Research**: Completed (README already exists)
-**Plans**: 3 plans (3 tasks)
-
-Plans:
-- [x] 04-01: Review existing README (already comprehensive)
-- [x] 04-02: Create .env.example and update README links
-- [x] 04-03: Create CONTRIBUTING.md guide
-
-### Phase 5: Release Polish
-**Goal**: Final cleanup and release preparation
-**Depends on**: Phase 4 (docs complete, ready to ship)
-**Research**: Completed
-**Plans**: 2 plans (2 tasks)
-
-Plans:
-- [x] 05-01: Fix lint errors for clean build
-- [x] 05-02: Add MIT LICENSE file
+</details>
 
 ## Progress
 
-**Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Auth Bug Fixes | v1.0 | 2/2 | Complete | 2026-01-08 |
+| 2. Architecture Review | v1.0 | 3/3 | Complete | 2026-01-08 |
+| 3. Security Audit | v1.0 | 4/4 | Complete | 2026-01-08 |
+| 4. Documentation | v1.0 | 3/3 | Complete | 2026-01-08 |
+| 5. Release Polish | v1.0 | 2/2 | Complete | 2026-01-08 |
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Auth Bug Fixes | 2/2 | Complete | 2026-01-08 |
-| 2. Architecture Review | 3/3 | Complete | 2026-01-08 |
-| 3. Security Audit | 4/4 | Complete | 2026-01-08 |
-| 4. Documentation | 3/3 | Complete | 2026-01-08 |
-| 5. Release Polish | 2/2 | Complete | 2026-01-08 |
+---
+
+_Next milestone: Use `/gsd:discuss-milestone` or `/gsd:new-milestone` to plan v1.1_

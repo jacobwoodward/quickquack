@@ -23,17 +23,17 @@ QuickQuack is a free, open-source, self-hosted scheduling application — an alt
 - ✓ Link-in-bio public profile page with social links and booking widgets — existing
 - ✓ Guest self-service rescheduling and cancellation — existing
 - ✓ Supabase Auth with Google OAuth — existing
+- ✓ Production auth redirect fix (OAuth callback uses canonical URL) — v1.0
+- ✓ Post-login navigation (authenticated users → dashboard) — v1.0
+- ✓ Architecture review (extracted utilities, added UI primitives) — v1.0
+- ✓ Security audit (fixed open redirect, XSS, cron bypass, added headers) — v1.0
+- ✓ Open source documentation (.env.example, CONTRIBUTING.md, MIT LICENSE) — v1.0
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] Fix production auth redirect (currently redirects to localhost after Google OAuth)
-- [ ] Fix post-login navigation (should redirect to dashboard, not landing page)
-- [ ] Architectural review for code quality and patterns
-- [ ] Security audit (OWASP, auth flows, data exposure)
-- [ ] Comprehensive README for open source release
-- [ ] Self-hosting documentation and setup guide
+(Ready for new milestone — all v1.0 requirements validated)
 
 ### Out of Scope
 
@@ -43,18 +43,31 @@ QuickQuack is a free, open-source, self-hosted scheduling application — an alt
 - UI/design changes — keep current look, prioritize function over form
 - Database schema changes — preserve existing data and structure unless bug fix requires it
 - Additional calendar providers — stick with Google Calendar for v1
+- IDOR fix for cancel/reschedule — deferred, requires booking token system
+- Zod input validation — deferred, significant refactor across all API routes
+- Rate limiting — deferred, infrastructure requirement
+- CSRF protection — deferred, complex implementation
 
 ## Context
 
-**Current State:**
+**Current State (v1.0 shipped 2026-01-08):**
 - Production deployment on Vercel with Supabase backend
-- Live users with existing data that must be protected
-- Codebase recently rebranded to QuickQuack
-- Marketing site at quickquack domain (to be confirmed)
+- Live users with existing data protected by RLS policies
+- Open source under MIT LICENSE
+- 15,164 lines of TypeScript across 40+ files
 
-**Known Issues:**
-- Auth redirect bug: After successful Google OAuth, app redirects to localhost instead of production URL
-- Navigation bug: After login, user lands on landing page instead of dashboard — unclear how to access admin panel
+**v1.0 Accomplishments:**
+- Fixed OAuth redirect and post-login navigation
+- Security hardened (open redirect, XSS, cron bypass fixed)
+- Added security headers (X-Frame-Options, X-Content-Type-Options)
+- Extracted shared utilities, added UI primitives (Checkbox, Alert)
+- Created .env.example, CONTRIBUTING.md for contributors
+
+**Known Technical Debt:**
+- 58+ `as any` Supabase casts (TypeScript limitation, eslint-disabled)
+- IDOR in cancel/reschedule (requires booking token system)
+- No Zod input validation (significant refactor)
+- No rate limiting (infrastructure requirement)
 
 **Technical Environment:**
 - Next.js 16 with App Router, React 19, TypeScript strict mode
@@ -75,9 +88,18 @@ QuickQuack is a free, open-source, self-hosted scheduling application — an alt
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Fix bugs before open source release | Can't release broken software | — Pending |
-| Security audit before public release | Protect users and reputation | — Pending |
+| Fix bugs before open source release | Can't release broken software | ✓ Good |
+| Security audit before public release | Protect users and reputation | ✓ Good |
 | Keep current tech stack | Stability over novelty, existing data | ✓ Good |
+| Use canonical URL for OAuth redirect | Fixes localhost redirect bug | ✓ Good |
+| Redirect authenticated users from / to /dashboard | Fixes post-login navigation | ✓ Good |
+| Use redirect URL allowlist | Prevents open redirect attacks | ✓ Good |
+| Remove dangerouslySetInnerHTML for CSS | Prevents XSS via custom CSS | ✓ Good |
+| Fail-closed cron endpoint | Security over availability if misconfigured | ✓ Good |
+| MIT LICENSE for open source | Permissive, community-friendly | ✓ Good |
+| Defer IDOR fix | Requires significant token system work | ⚠️ Revisit |
+| Defer Zod validation | Significant refactor, not blocking | ⚠️ Revisit |
+| Document `as any` casts as tech debt | Supabase limitation, not fixable now | ⚠️ Revisit |
 
 ---
-*Last updated: 2026-01-08 after initialization*
+*Last updated: 2026-01-08 after v1.0 milestone*
