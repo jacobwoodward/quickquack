@@ -111,7 +111,7 @@ export default async function Home() {
       links={links}
       eventTypes={eventTypes}
       socialProfiles={socialProfiles}
-      baseUrl=""
+      baseUrl="/book"
     />
   );
 }

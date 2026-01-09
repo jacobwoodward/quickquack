@@ -407,11 +407,9 @@ export function AppearanceSettings({
               className="rounded-lg min-h-[500px]"
             />
           </Card>
-          {user.username && (
-            <p className="mt-3 text-xs text-gray-500 text-center">
-              Your page: book/{user.username}
-            </p>
-          )}
+          <p className="mt-3 text-xs text-gray-500 text-center">
+            Your public page is at the root URL
+          </p>
         </div>
       </div>
     </div>

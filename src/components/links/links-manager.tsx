@@ -419,11 +419,9 @@ export function LinksManager({
               className="rounded-lg"
             />
           </Card>
-          {username && (
-            <p className="mt-3 text-xs text-gray-500 text-center">
-              Your page: book/{username}
-            </p>
-          )}
+          <p className="mt-3 text-xs text-gray-500 text-center">
+            Your public page is at the root URL
+          </p>
         </div>
       </div>
     </div>
